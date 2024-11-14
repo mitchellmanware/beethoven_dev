@@ -1,0 +1,120 @@
+Active library paths:
+[1] "/usr/local/lib/R/site-library" "/usr/local/lib/R/library"     
+▶ dispatched target chr_input_dir
+▶ dispatched target chr_iter_calc_narr
+▶ dispatched target chr_daterange
+● completed target chr_input_dir [6.642 seconds, 45 bytes]
+● completed target chr_iter_calc_narr [6.55 seconds, 44 bytes]
+● completed target chr_daterange [6.416 seconds, 72 bytes]
+▶ dispatched target chr_years
+▶ dispatched target sf_feat_proc_aqs_sites
+● completed target chr_years [0.001 seconds, 42 bytes]
+● completed target sf_feat_proc_aqs_sites [37.64 seconds, 1.128 kilobytes]
+▶ dispatched target list_feat_proc_aqs_sites
+● completed target list_feat_proc_aqs_sites [0.007 seconds, 1.319 kilobytes]
+▶ dispatched target chr_aqsnames
+● completed target chr_aqsnames [0.001 seconds, 124 bytes]
+▶ dispatched branch list_feat_calc_narr_40c570741a44e0bf
+▶ dispatched branch list_feat_calc_narr_e756c7185dbc9e2f
+▶ dispatched branch list_feat_calc_narr_f1792d01f8748d5f
+▶ dispatched branch list_feat_calc_narr_ecb9b2f41d2d0871
+▶ dispatched branch list_feat_calc_narr_f5d9bf8107521b65
+▶ dispatched branch list_feat_calc_narr_11a74ea4e80fc066
+▶ dispatched branch list_feat_calc_narr_4c973b11883e460d
+▶ dispatched branch list_feat_calc_narr_f4bf38cae49a1b1f
+▶ dispatched branch list_feat_calc_narr_39343e1bc3a3e3ab
+▶ dispatched branch list_feat_calc_narr_d8b077aa3b587688
+▶ dispatched branch list_feat_calc_narr_d23bf1de23cc1591
+▶ dispatched branch list_feat_calc_narr_dbec4381dac67722
+▶ dispatched branch list_feat_calc_narr_502bec28b32cc4c0
+▶ dispatched branch list_feat_calc_narr_802f60f00734fbf4
+▶ dispatched branch list_feat_calc_narr_d2220910166b0369
+▶ dispatched branch list_feat_calc_narr_7c224ef5f6a53034
+▶ dispatched branch list_feat_calc_narr_c0068389bd74dbd9
+▶ dispatched branch list_feat_calc_narr_2570e1dbf72a9a2b
+▶ dispatched branch list_feat_calc_narr_4cd78b8e7f2bcdc1
+▶ dispatched branch list_feat_calc_narr_28453d0ab723013d
+▶ dispatched branch list_feat_calc_narr_b965e7595b5a53e1
+▶ dispatched branch list_feat_calc_narr_fc84520eb3deefd2
+▶ dispatched branch list_feat_calc_narr_9e39c3b8acd84eac
+▶ dispatched branch list_feat_calc_narr_2bab49b256240749
+▶ dispatched branch list_feat_calc_narr_41ab3eeab5db02f0
+● completed branch list_feat_calc_narr_40c570741a44e0bf [0.265 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_2ca1f3ae2d449b16
+● completed branch list_feat_calc_narr_28453d0ab723013d [0.272 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_46664cd5fc742aeb
+● completed branch list_feat_calc_narr_b965e7595b5a53e1 [0.098 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_7164e476c8fbf6a2
+● completed branch list_feat_calc_narr_2ca1f3ae2d449b16 [0.092 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_c7c9363414f32e6b
+● completed branch list_feat_calc_narr_2570e1dbf72a9a2b [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_f12268d5529adc23
+● completed branch list_feat_calc_narr_c7c9363414f32e6b [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_baebbf0e1ee933ab
+● completed branch list_feat_calc_narr_f12268d5529adc23 [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_3228a40062c85d56
+● completed branch list_feat_calc_narr_baebbf0e1ee933ab [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_22a8ff1832e95748
+● completed branch list_feat_calc_narr_3228a40062c85d56 [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_62c57fa5fbe69792
+● completed branch list_feat_calc_narr_22a8ff1832e95748 [0.09 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_ac837842ad3c5c88
+● completed branch list_feat_calc_narr_62c57fa5fbe69792 [0.09 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_3c2060fc6bdba545
+● completed branch list_feat_calc_narr_ac837842ad3c5c88 [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_5609d73610c1ff16
+● completed branch list_feat_calc_narr_3c2060fc6bdba545 [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_2f3e11ad800e319b
+● completed branch list_feat_calc_narr_5609d73610c1ff16 [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_23fcc58f5aaa9e01
+● completed branch list_feat_calc_narr_2f3e11ad800e319b [0.092 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_10559bc0c5b7f1df
+● completed branch list_feat_calc_narr_23fcc58f5aaa9e01 [0.091 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_a07dce1381ed3956
+● completed branch list_feat_calc_narr_4cd78b8e7f2bcdc1 [5.386 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_738f0885951860f0
+● completed branch list_feat_calc_narr_10559bc0c5b7f1df [0.092 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_7445018369a15408
+● completed branch list_feat_calc_narr_9e39c3b8acd84eac [5.518 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_0cd031f376d4e90e
+● completed branch list_feat_calc_narr_e756c7185dbc9e2f [5.324 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_0a46211d74e1832a
+● completed branch list_feat_calc_narr_46664cd5fc742aeb [5.73 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_c8bc46da87b9d663
+● completed branch list_feat_calc_narr_11a74ea4e80fc066 [5.527 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_faa58a07c9828a0f
+● completed branch list_feat_calc_narr_41ab3eeab5db02f0 [5.722 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_273fd26a7ad4ff11
+● completed branch list_feat_calc_narr_a07dce1381ed3956 [0.191 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_8b1a02b436db2041
+● completed branch list_feat_calc_narr_2bab49b256240749 [5.734 seconds, 223 bytes]
+▶ dispatched branch list_feat_calc_narr_c4189501c5c9f8d8
+● completed branch list_feat_calc_narr_738f0885951860f0 [0.092 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_f4bf38cae49a1b1f [5.646 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_d23bf1de23cc1591 [5.526 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_dbec4381dac67722 [5.49 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_d2220910166b0369 [5.472 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_502bec28b32cc4c0 [5.528 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_ecb9b2f41d2d0871 [5.748 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_c0068389bd74dbd9 [5.434 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_7c224ef5f6a53034 [5.465 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_fc84520eb3deefd2 [6.033 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_7445018369a15408 [0.18 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_0cd031f376d4e90e [0.181 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_d8b077aa3b587688 [5.699 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_f5d9bf8107521b65 [5.916 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_39343e1bc3a3e3ab [5.911 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_c8bc46da87b9d663 [0.099 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_802f60f00734fbf4 [5.772 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_c4189501c5c9f8d8 [0.091 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_f1792d01f8748d5f [6.075 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_0a46211d74e1832a [0.18 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_273fd26a7ad4ff11 [0.187 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_faa58a07c9828a0f [0.183 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_8b1a02b436db2041 [0.181 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_4c973b11883e460d [6.268 seconds, 223 bytes]
+● completed branch list_feat_calc_narr_7164e476c8fbf6a2 [6.411 seconds, 223 bytes]
+● completed pattern list_feat_calc_narr 
+▶ dispatched target dt_feat_calc_narr
+● completed target dt_feat_calc_narr [0.003 seconds, 292 bytes]
+▶ ended pipeline [1.015 minutes]
