@@ -18,3 +18,4 @@ apptainer exec \
   --bind $PWD/_targets:/opt/_targets \
   beethoven_dl_calc.sif \
   Rscript --no-init-file /mnt/inst/targets/targets_start.R
+

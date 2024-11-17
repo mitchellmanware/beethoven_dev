@@ -5,7 +5,7 @@ target_run <-
     ###########################     CRITICAL TARGETS      ######################
     targets::tar_target(
       chr_dates,
-      command = c("2018-01-01", "2018-01-12")
+      command = c("2018-01-01", "2018-01-15")
     )
     ,
 
@@ -24,20 +24,13 @@ target_run <-
     )
     ,
 
-     targets::tar_target(
-      chr_iter_calc_gridmet,
-      command = c("Precipitation", "Maximum Near-Surface Air Temperature"),
-      iteration = "vector",
-    )
-    ,
   
       targets::tar_target(
       chr_iter_calc_narr,
       command = c(
         "air.sfc", "weasd"
       ),
-      iteration = "vector",
-      description = "NARR features"
+      iteration = "vector"
     )
     ,
 
@@ -50,7 +43,7 @@ target_run <-
         parameter_code = "88101",
         resolution_temporal = "daily",
         year = chr_years,
-        directory_to_save = "input/aqs/",
+        directory_to_save = "/input/aqs/",
         acknowledgement = TRUE,
         download = TRUE,
         remove_command = TRUE,
@@ -64,24 +57,6 @@ target_run <-
   )
   ,
 
-  # targets::tar_target(
-  #   name = download_gridmet,
-  #   command = {
-    #   download_gridmet(
-    #   variables = "pr",
-    #   year = 2018,
-    #   directory_to_save = "input/gridmet/",
-    #   acknowledgement = TRUE,
-    #   download = TRUE,
-    #   remove_command = FALSE,
-    #   hash = TRUE
-    # )
-  #   },
-  #   pattern = map(chr_iter_calc_gridmet),
-  #   iteration = "list"
-  # )
-  # ,
-
       targets::tar_target(
       download_narr,
       command = amadeus::download_narr(
@@ -94,8 +69,7 @@ target_run <-
         hash = TRUE
       ),
       pattern = cross(chr_iter_calc_narr, chr_years),
-      iteration = "list",
-      description = "Download NARR data"
+      iteration = "list"
     )
     ,
 
@@ -117,37 +91,6 @@ target_run <-
       iteration = "list"    
 
   ),
-
-
-  #   targets::tar_target(
-  #   name = process_gridmet,
-  #   command = {
-  #     process_gridmet(
-  #     path = paste0("/input/aqs/", "pr"),
-  #     variable = "pr",
-  #     date = c(chr_daterange[1], chr_daterange[1]),
-  #     return_format = "sf"
-  #     )
-  #   },
-  #     pattern = cross(chr_daterange, chr_iter_calc_gridmet),
-  #     iteration = "list"    
-  
-  # )
-  # # ,
-  #   geotargets::tar_terra_rast(
-  #   name = process_narr,
-  #   command = {
-  #     download_narr
-  #     process_narr(
-  #     path = paste0("/input/narr/", chr_iter_calc_narr),
-  #     variable = chr_iter_calc_narr,
-  #     date = chr_daterange
-  #     )
-  #   },
-  #     pattern = cross(chr_iter_calc_narr, chr_daterange)
-  
-  # )
-  # ,
 
  
   ###########################       CALCULATE      ###########################
