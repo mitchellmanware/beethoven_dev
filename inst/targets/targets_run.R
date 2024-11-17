@@ -4,151 +4,174 @@ target_run <-
     ############################################################################
     ###########################     CRITICAL TARGETS      ######################
     targets::tar_target(
+      chr_dates,
+      command = c("2018-01-01", "2018-01-12")
+    )
+    ,
+
+    targets::tar_target(
+      chr_years,
+      command = unique(lubridate::year(chr_daterange)),
+      iteration = "list"
+    )
+    ,
+
+    targets::tar_target(
       chr_daterange,
       command = amadeus::generate_date_sequence(
-        "2018-01-01", "2018-01-10", sub_hyphen = FALSE
+        chr_dates[1], chr_dates[2], sub_hyphen = FALSE
       )
     )
     ,
-    targets::tar_target(
-      chr_dateend,
-      command = {
-        if (file.exists("/inst/extdata/chr_dateend.qs")) {
-          chr_dateend <- qs::qread("/inst/extdata/chr_dateend.qs")
-          chr_dateend
-        } else {
-          chr_dateend <- chr_daterange[1] - 1
-          chr_dateend
-        }
-      }
+
+     targets::tar_target(
+      chr_iter_calc_gridmet,
+      command = c("Precipitation", "Maximum Near-Surface Air Temperature"),
+      iteration = "vector",
     )
     ,
-    targets::tar_target(
-      chr_daterun,
-      command = chr_daterange[chr_daterange > chr_dateend]
-    )
-    ,
-    targets::tar_target(
-      chr_input_dir,
-      command = "/input",
-      description = "Input directory"
-    )
-    ,
-    ############################################################################
-    ############################################################################
-    ###########################         AQS          ###########################
-    targets::tar_target(
-      list_feat_proc_aqs_sites_prev,
-      command = {
-        if (file.exists("/inst/extdata/list_feat_proc_aqs_sites.qs")) {
-          list_feat_proc_aqs_sites_prev <- qs::qread(
-            "/inst/extdata/list_feat_proc_aqs_sites.qs"
-          )
-          list_feat_proc_aqs_sites_prev
-        } else {
-          list()
-        }
-      },
-      cue = targets::tar_cue("always"),
-      description = "AQS sites (previous)"
-    )
-    ,
-    targets::tar_target(
-      list_feat_proc_aqs_sites_new,
-      command = {
-        sf_feat_proc_aqs_sites_new <- amadeus::process_aqs(
-          path = list.files(
-            path = file.path(
-              chr_input_dir,
-              "aqs",
-              "data_files"
-            ),
-            pattern = "daily_88101_[0-9]{4}.csv",
-            full.names = TRUE
-          ),
-          date = c(chr_daterun[1], chr_daterun[length(chr_daterun)]),
-          mode = "location",
-          return_format = "sf"
-        )
-        chr_aqsprev <- as.vector(
-          unlist(
-            lapply(list_feat_proc_aqs_sites_prev, function(x) x$site_id)
-          )
-        )
-        chr_aqsnew <- setdiff(
-          sf_feat_proc_aqs_sites_new$site_id,
-          chr_aqsprev
-        )
-        sf_feat_proc_aqs_sites_filter <- sf_feat_proc_aqs_sites_new[
-          which(sf_feat_proc_aqs_sites_new$site_id %in% chr_aqsnew),
-        ]
-        list_feat_proc_aqs_sites_new <- list(sf_feat_proc_aqs_sites_filter)
-        names(list_feat_proc_aqs_sites_new) <-
-          length(list_feat_proc_aqs_sites_prev) + 1
-        list_feat_proc_aqs_sites_new
-      },
-      iteration = "list",
-      description = "AQS sites (new)"
-    )
-    ,
-    targets::tar_target(
-      list_feat_proc_aqs_sites,
-      command = {
-        list_feat_proc_aqs_sites <- c(
-          list_feat_proc_aqs_sites_prev,
-          list_feat_proc_aqs_sites_new
-        )
-        qs::qsave(
-          list_feat_proc_aqs_sites,
-          "/inst/extdata/list_feat_proc_aqs_sites.qs"
-        )
-        qs::qsave(
-          chr_daterun[length(chr_daterun)],
-          "/inst/extdata/chr_dateend.qs"
-        )
-        list_feat_proc_aqs_sites
-      },
-      description = "AQS sites"
-    )
-    ,
-    targets::tar_target(
-      chr_aqsnames,
-      command = names(list_feat_proc_aqs_sites),
-    )
-    ,
-    ###########################       CALCULATE      ###########################
-    targets::tar_target(
+  
+      targets::tar_target(
       chr_iter_calc_narr,
-      command = c("weasd"),
+      command = c(
+        "air.sfc", "weasd"
+      ),
       iteration = "vector",
       description = "NARR features"
     )
     ,
-    targets::tar_target(
-      list_feat_calc_narr,
-      command = par_narr(
-        domain = chr_iter_calc_narr,
-        path = file.path(chr_input_dir, "/narr/"),
-        date = c(chr_daterun, chr_daterun),
-        locs = list_feat_proc_aqs_sites[[chr_aqsnames]],
-        nthreads = 1
+
+  #############  DOWNLOAD #############
+
+  targets::tar_target(
+    name = download_aqs,
+    command = {
+      download_aqs(
+        parameter_code = "88101",
+        resolution_temporal = "daily",
+        year = chr_years,
+        directory_to_save = "input/aqs/",
+        acknowledgement = TRUE,
+        download = TRUE,
+        remove_command = TRUE,
+        unzip = TRUE,
+        remove_zip = TRUE,
+        hash = TRUE
+      )
+    },
+    pattern = map(chr_years),
+    iteration = "list"
+  )
+  ,
+
+  # targets::tar_target(
+  #   name = download_gridmet,
+  #   command = {
+    #   download_gridmet(
+    #   variables = "pr",
+    #   year = 2018,
+    #   directory_to_save = "input/gridmet/",
+    #   acknowledgement = TRUE,
+    #   download = TRUE,
+    #   remove_command = FALSE,
+    #   hash = TRUE
+    # )
+  #   },
+  #   pattern = map(chr_iter_calc_gridmet),
+  #   iteration = "list"
+  # )
+  # ,
+
+      targets::tar_target(
+      download_narr,
+      command = amadeus::download_narr(
+        variables = chr_iter_calc_narr,
+        directory_to_save =  "/input/narr/",
+        year = chr_years,
+        remove_command = FALSE,
+        acknowledgement = TRUE,
+        download = TRUE,
+        hash = TRUE
       ),
-      pattern = cross(chr_iter_calc_narr, chr_daterun, chr_aqsnames),
-      cue = targets::tar_cue("thorough"),
+      pattern = cross(chr_iter_calc_narr, chr_years),
       iteration = "list",
-      description = "Calculate NARR features (fit)"
+      description = "Download NARR data"
     )
     ,
-    ###########################      DATA.TABLE      ###########################
+
+  # ############### PROCESS ##################
+
+  targets::tar_target(
+    name = process_aqs,
+    command = {
+      download_aqs
+      process_aqs(
+      path = "/input/aqs/data_files/",
+      date = chr_daterange,
+      mode = "date-location",
+      data_field = "Arithmetic.Mean",
+      return_format = "sf"
+      )
+    },
+      pattern = map(chr_daterange),
+      iteration = "list"    
+
+  ),
+
+
+  #   targets::tar_target(
+  #   name = process_gridmet,
+  #   command = {
+  #     process_gridmet(
+  #     path = paste0("/input/aqs/", "pr"),
+  #     variable = "pr",
+  #     date = c(chr_daterange[1], chr_daterange[1]),
+  #     return_format = "sf"
+  #     )
+  #   },
+  #     pattern = cross(chr_daterange, chr_iter_calc_gridmet),
+  #     iteration = "list"    
+  
+  # )
+  # # ,
+  #   geotargets::tar_terra_rast(
+  #   name = process_narr,
+  #   command = {
+  #     download_narr
+  #     process_narr(
+  #     path = paste0("/input/narr/", chr_iter_calc_narr),
+  #     variable = chr_iter_calc_narr,
+  #     date = chr_daterange
+  #     )
+  #   },
+  #     pattern = cross(chr_iter_calc_narr, chr_daterange)
+  
+  # )
+  # ,
+
+ 
+  ###########################       CALCULATE      ###########################
+
     targets::tar_target(
-      dt_feat_calc_narr,
-      command = reduce_merge(
-        lapply(
-          list(list_feat_calc_narr),
-          function(x) reduce_merge(reduce_list(lapply(x, "[[", 1)))
-        ),
-        by = c("site_id", "time")
-      ),
-      description = "data.table of NARR features (fit)"
+      calc_narr,
+      command = {
+        process_aqs
+          narr <-   process_narr(
+          path = paste0("/input/narr/", chr_iter_calc_narr),
+            variable = chr_iter_calc_narr,
+            date = chr_daterange
+          )        
+        calculate_narr(
+          from = narr,
+          locs = process_aqs,
+          locs_id = "site_id",
+          radius = 0,
+          fun = "mean",
+          geom = "sf"
+        )
+      },
+      pattern = cross(process_aqs, cross(chr_iter_calc_narr, chr_daterange)),
+      iteration = "list"
     )
+
   )

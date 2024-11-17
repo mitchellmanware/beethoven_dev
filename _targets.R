@@ -1,3 +1,13 @@
+library(targets)
+library(tarchetypes)
+library(geotargets)
+library(qs)
+library(tidyverse)
+library(data.table)
+library(sf)
+library(crew)
+library(lubridate)
+
 ################################################################################
 ##############################      BEETHOVEN      #############################
 ##### Main file controlling the settings, options, and sourcing of targets
@@ -16,8 +26,8 @@ targets::tar_config_set(store = "/opt/_targets")
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
   packages = c(
-    "beethoven", "targets", "tarchetypes", "dplyr",
-    "data.table", "sf", "crew", "crew.cluster"
+    "amadeus", "targets", "tarchetypes", "geotargets","dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster","lubridate", "qs"
   ),
   repository = "local",
   error = "continue",

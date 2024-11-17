@@ -2,3 +2,10 @@
 
 targets/*
 slurm/*
+
+_targets/*
+
+
+input/*
+
+inst/extdata/*
