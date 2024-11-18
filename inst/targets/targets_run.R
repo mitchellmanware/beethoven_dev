@@ -5,6 +5,7 @@ target_run <-
     ###########################     CRITICAL TARGETS      ######################
     targets::tar_target(
       chr_dates,
+      # command = c("2018-12-20", "2018-12-31")
       command = c("2018-12-20", "2019-01-05")
     )
     ,
@@ -144,7 +145,7 @@ target_run <-
               geom = "sf"
           )
       },
-      pattern = cross(process_aqs, chr_daterange),
+      pattern = cross(process_aqs, cross(chr_iter_calc_narr, chr_daterange)),
       iteration = "list"
   )
 
