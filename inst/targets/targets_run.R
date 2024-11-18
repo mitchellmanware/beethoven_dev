@@ -5,8 +5,8 @@ target_run <-
     ###########################     CRITICAL TARGETS      ######################
     targets::tar_target(
       chr_dates,
-      command = c("2018-12-30", "2018-12-31")
-      # command = c("2018-12-30", "2019-01-01")
+      # command = c("2018-12-27", "2019-01-06")
+      command = c("2018-12-27", "2019-01-09")
     ),
     targets::tar_target(
       chr_years,
@@ -20,30 +20,19 @@ target_run <-
       )
     ),
     targets::tar_target(
-      chr_iter_calc_narr,
-      command = c("weasd"),
-      iteration = "vector"
+      list_dates,
+      command = beethoven::split_dates(
+        dates = chr_dates,
+        n = 4,
+        year = TRUE
+      )
     ),
     ###########################       DOWNLOAD       ###########################
-    # targets::tar_target(
-    #   name = download_aqs,
-    #   command = {
-    #     amadeus::download_aqs(
-    #       parameter_code = "88101",
-    #       resolution_temporal = "daily",
-    #       year = chr_years,
-    #       directory_to_save = "/input/aqs/",
-    #       acknowledgement = TRUE,
-    #       download = TRUE,
-    #       remove_command = TRUE,
-    #       unzip = TRUE,
-    #       remove_zip = TRUE,
-    #       hash = FALSE
-    #     )
-    #   },
-    #   pattern = map(chr_years),
-    #   iteration = "list"
-    # ),
+    targets::tar_target(
+      chr_iter_calc_narr,
+      command = c("weasd", "air.sfc"),
+      iteration = "vector"
+    ),
     targets::tar_target(
       download_narr,
       command = amadeus::download_narr(
@@ -85,30 +74,34 @@ target_run <-
           }
         )
         aqs_sort <- aqs_list[sort(names(aqs_list))]
-        aqs_sort
+        aqs_sort[1:5]
       },
       description = "AQS sites as sorted list"
+    ),
+    geotargets::tar_terra_rast(
+      process_narr,
+      command = {
+        download_narr_buffer
+        amadeus::process_narr(
+          path = paste0("/input/narr/", chr_iter_calc_narr),
+          variable = chr_iter_calc_narr,
+          date = beethoven::fl_dates(list_dates[[1]])
+        )
+      },
+      pattern = cross(list_dates, chr_iter_calc_narr),
     ),
     ###########################       CALCULATE      ###########################
     targets::tar_target(
       calc_narr,
-      command = {
-        download_narr_buffer
-        process_narr <- amadeus::process_narr(
-          path = paste0("/input/narr/", chr_iter_calc_narr),
-          variable = chr_iter_calc_narr,
-          date = chr_daterange
-        )
-        amadeus::calculate_narr(
-          from = process_narr,
-          locs = process_aqs[[1]],
-          locs_id = "site_id",
-          radius = 0,
-          fun = "mean",
-          geom = "sf"
-        )
-      },
-      pattern = cross(process_aqs, cross(chr_daterange, chr_iter_calc_narr)),
+      command = amadeus::calculate_narr(
+        from = process_narr[[1]],
+        locs = process_aqs[[1]],
+        locs_id = "site_id",
+        radius = 0,
+        fun = "mean",
+        geom = FALSE
+      ),
+      pattern = cross(process_aqs, process_narr),
       iteration = "list"
     )
   )

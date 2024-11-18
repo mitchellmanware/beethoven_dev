@@ -35,6 +35,7 @@ From: rocker/geospatial:latest
         'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs'))"
     Rscript -e "pak::pak('NIEHS/amadeus')"
     Rscript -e "devtools::install_github('njtierney/geotargets')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-1028')"
 
 
 %environment
