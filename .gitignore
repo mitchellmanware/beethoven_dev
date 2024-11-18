@@ -9,3 +9,5 @@ _targets/*
 input/*
 
 inst/extdata/*
+
+save/
