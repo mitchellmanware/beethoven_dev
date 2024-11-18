@@ -5,7 +5,7 @@ target_run <-
     ###########################     CRITICAL TARGETS      ######################
     targets::tar_target(
       chr_dates,
-      command = c("2018-12-20", "2019-01-03")
+      command = c("2018-12-20", "2019-01-05")
     )
     ,
 
@@ -109,18 +109,19 @@ target_run <-
 
   ),
 
-geotargets::tar_terra_rast(
-    name = process_narr,
-    command = {
-      amadeus::process_narr(
-        path = paste0("/input/narr/", chr_iter_calc_narr[[1]]),
-        variable = chr_iter_calc_narr[[1]],
-        date = chr_daterange,
-      )
-    }, 
-    pattern = cross(chr_iter_calc_narr, chr_daterange)
-  )
-  ,
+# geotargets::tar_terra_rast(
+#     name = process_narr,
+#     command = {
+#       r <- amadeus::process_narr(
+#         path = paste0("/input/narr/", chr_iter_calc_narr[[1]]),
+#         variable = chr_iter_calc_narr[[1]],
+#         date = chr_daterange,
+#       )
+#       r
+#     }, 
+#     pattern = cross(chr_iter_calc_narr, chr_daterange)
+#   )
+#   ,
 
  
   ###########################       CALCULATE      ###########################
@@ -128,8 +129,14 @@ geotargets::tar_terra_rast(
   targets::tar_target(
       calc_narr,
       command = {
+        r <- amadeus::process_narr(
+        path = paste0("/input/narr/", chr_iter_calc_narr[[1]]),
+        variable = chr_iter_calc_narr[[1]],
+        date = chr_daterange,
+      )
+
           calculate_narr(
-              from = process_narr,
+              from = r,
               locs = process_aqs,
               locs_id = "site_id",
               radius = 0,
@@ -137,7 +144,7 @@ geotargets::tar_terra_rast(
               geom = "sf"
           )
       },
-      pattern = cross(process_aqs, process_narr),
+      pattern = cross(process_aqs, chr_daterange),
       iteration = "list"
   )
 
