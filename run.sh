@@ -5,10 +5,13 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
-#SBATCH --mem=50G
-#SBATCH --cpus-per-task=25
+#SBATCH --mem=200G
+#SBATCH --cpus-per-task=100
 #SBATCH --error=slurm/dev_%j.err
 #SBATCH --output=slurm/dev_%j.out
+
+# Set the CURL_CA_BUNDLE to use the correct certificate file
+export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # run pipeline in the container
 apptainer exec \
