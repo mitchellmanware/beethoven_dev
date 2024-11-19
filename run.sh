@@ -10,8 +10,10 @@
 #SBATCH --error=slurm/dev_%j.err
 #SBATCH --output=slurm/dev_%j.out
 
-# Set the CURL_CA_BUNDLE to use the correct certificate file
+# Set the CURL_CA_BUNDLE and SSL_CERT_FILE to vertify the server's SSL
+# certificate during download.
 export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 # run pipeline in the container
 apptainer exec \
