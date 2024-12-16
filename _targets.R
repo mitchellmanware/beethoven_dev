@@ -16,8 +16,8 @@ targets::tar_config_set(store = "/opt/_targets")
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
   packages = c(
-    "amadeus", "targets", "tarchetypes", "geotargets", "dplyr", "tidyverse",
-    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs"
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2"
   ),
   repository = "local",
   error = "continue",
@@ -34,6 +34,4 @@ targets::tar_option_set(
 targets::tar_source("inst/targets/targets_run.R")
 
 ##############################      PIPELINE      ##############################
-list(
-  target_run
-)
+list(target_run)
