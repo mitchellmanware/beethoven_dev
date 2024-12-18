@@ -5,7 +5,7 @@ target_run <-
     ###########################      STABLE TARGETS       ######################
     targets::tar_target(
       chr_daterange,
-      command = c("2018-01-01", "2018-02-28"),
+      command = c("2022-01-01", "2022-01-31"),
       description = "Date range"
     )
     ,
@@ -128,63 +128,91 @@ target_run <-
           ),
           function(x) dplyr::bind_rows(x)
         )
-        list_feat_state_aqs_sites[1:2]
+        list_feat_state_aqs_sites[1]
       },
       description = "AQS locations"
     )
     ,
     ############################################################################
     ############################################################################
-    #########################             NARR            ######################
+    #########################            MODIS            ######################
     targets::tar_target(
-      chr_iter_calc_narr,
-      # command = c("weasd", "air.sfc")
-      command = c("weasd", "air.sfc", "shum")
+      chr_args_calc_mcd19_files,
+      command = list.files(
+        file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
+        full.names = TRUE,
+        recursive = TRUE
+      ),
+      description = "MODIS - MCD19_*km files"
     )
     ,
     targets::tar_target(
-      list_feat_calc_narr,
-      command = amadeus::calculate_narr(
-        from = amadeus::process_narr(
-          path = file.path(chr_input_dir, "narr", chr_iter_calc_narr),
-          variable = chr_iter_calc_narr,
-          date = beethoven::fl_dates(unlist(list_dates))
+      list_args_calc_mcd19_1km,
+      command = list(
+        from = grep(
+          x = chr_args_calc_mcd19_files,
+          pattern = paste0(
+            "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
         ),
-        locs = list_feat_proc_aqs_sites[[1]],
-        locs_id = "site_id",
-        radius = 0,
-        fun = "mean",
-        geom = FALSE
+        name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
+        subdataset = "^Optical_Depth",
+        radius = chr_iter_radii
       ),
-      pattern = cross(list_feat_proc_aqs_sites, list_dates, chr_iter_calc_narr),
+      pattern = map(list_dates_julian),
       iteration = "list",
-      description = "Calculate NARR features | fit"
+      description = "MODIS - MCD19_1km arguments"
     )
     ,
     targets::tar_target(
-      list_feat_calc_narr_2,
-      command = lapply(
-        list_feat_calc_narr,
-        function(x) {
-          if (length(grep("level", names(x))) == 1) {
-            y <- x[x$level == 1000, ]
-            y <- y[, -grep("level", names(y))]
-          } else {
-            y <- x
-          }
-          return(y)
-        }
+      list_feat_calc_mcd19_1km,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mcd19_1km
       ),
-      description = "Calculate NARR features | 1000 hPa | fit"
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_1km),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "beethoven_controller")
+      ),
+      description = "Calculate MODIS - MCD19_1km features | fit"
     )
     ,
     targets::tar_target(
-      dt_feat_calc_narr,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_calc_narr_2),
-        by = c("site_id", "time")
+      list_args_calc_mcd19_5km,
+      command = list(
+        from = grep(
+          x = chr_args_calc_mcd19_files,
+          pattern = paste0(
+            "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
+        ),
+        name_covariates = c(
+          "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
+          "MOD_SCTAN_0_", "MOD_GLNAN_0_"
+        ),
+        subdataset = "cos|RelAZ|Angle",
+        radius = chr_iter_radii
       ),
-      description = "data.table of NARR features | fit"
+      pattern = map(list_dates_julian),
+      iteration = "list",
+      description = "MODIS - MCD19_5km arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_mcd19_5km,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mcd19_5km
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_5km),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "beethoven_controller")
+      ),
+      description = "Calculate MODIS - MCD19_5km features | fit"
     )
     ############################################################################
     ############################################################################

@@ -6,7 +6,7 @@
 #############################      CONTROLLER      #############################
 beethoven_controller <- crew::crew_controller_local(
   name = "beethoven_controller",
-  workers = 100,
+  workers = 25,
   seconds_idle = 30
 )
 
