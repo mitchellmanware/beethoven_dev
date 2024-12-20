@@ -36,7 +36,7 @@ From: rocker/geospatial:latest
         'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
         'nanonext'))"
     Rscript -e "pak::pak('NIEHS/amadeus@1.2.1')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-1028')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-1219')"
 
 
 %environment
