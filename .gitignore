@@ -1,6 +1,6 @@
 *.sif
 
-targets/*
+_targets/*
 slurm/*
 
 _targets/*
