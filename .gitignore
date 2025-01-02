@@ -1,4 +1,14 @@
 *.sif
 
-targets/*
+_targets/*
 slurm/*
+
+_targets/*
+
+input/*
+
+inst/extdata/*
+
+*.out
+
+*.qs

@@ -1,0 +1,60 @@
+BootStrap: docker
+From: rocker/ml-verse:latest
+
+%post
+    # Update package list
+    apt-get update
+
+    # Install locales and generate the necessary locale
+    apt-get install -y locales
+    locale-gen en_US.UTF-8
+
+    # Install fonts for Unicode support
+    apt-get install -y fonts-dejavu fonts-liberation fonts-noto \
+        fonts-unifont
+
+    # Add NVIDIA repository for CUDA 12.3 and install CUDA package
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-12-3_12.3.0-1_amd64.deb
+    dpkg -i cuda-12-3_12.3.0-1_amd64.deb
+    apt-get update
+
+    # Install CUDA Toolkit and runtime
+    apt-get install -y cuda-toolkit-12-3 cuda-runtime-12-3
+
+    # Install NVIDIA driver libraries compatible with host version
+    apt-get install -y nvidia-driver-libs=545.23.06
+
+    # Set locale for the environment
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+    echo "LANG=en_US.UTF-8" > /etc/locale.conf
+    echo "LC_ALL=en_US.UTF-8" >> /etc/locale.conf
+
+    # Create directories
+    mkdir /pipeline
+    mkdir /input
+    mkdir /opt/_targets
+
+    # Install R packages
+    Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
+        'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
+        'torch', 'nanonext'))"
+    Rscript -e "torch::install_torch(version = 'latest', type = 'gpu')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev')"
+
+%environment
+    # Set locale for the container environment
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+    export TERM=xterm-256color
+    export CUDA_VISIBLE_DEVICES=0,1,2,3
+    export PATH="/usr/local/cuda/bin:$PATH"
+    export CUDA_HOME="/usr/local/cuda"
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+    export PATH="$PATH:/usr/local/cuda/bin"
+
+%runscript
+
+%labels
+    basic machine learning with targets and crew plus unicode text so the \
+    target progress prints nicely

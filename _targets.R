@@ -16,8 +16,9 @@ targets::tar_config_set(store = "/opt/_targets")
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
   packages = c(
-    "beethoven", "targets", "tarchetypes", "dplyr",
-    "data.table", "sf", "crew", "crew.cluster"
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
+    "torch"
   ),
   repository = "local",
   error = "continue",
@@ -31,9 +32,20 @@ targets::tar_option_set(
 )
 
 ###########################      SOURCE TARGETS      ###########################
-targets::tar_source("inst/targets/targets_run.R")
+targets::tar_source("inst/targets/targets_critical.R")
+targets::tar_source("inst/targets/targets_initiate.R")
+targets::tar_source("inst/targets/targets_covariates.R")
+targets::tar_source("inst/targets/targets_models.R")
+
+###########################      SYSTEM SETTINGS      ##########################
+if (Sys.getenv("BEETHOVEN") == "covariates") {
+  target_models <- NULL
+}
 
 ##############################      PIPELINE      ##############################
 list(
-  target_run
+  target_critical,
+  target_initiate,
+  target_covariates,
+  target_models
 )
