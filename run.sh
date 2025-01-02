@@ -40,6 +40,8 @@ apptainer exec \
 #############################        MODELS        #############################
 # Set environmental variable to indicate model fitting targets.
 export BEETHOVEN=models
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 # Fit models via container_models.sif
 apptainer exec \
@@ -48,5 +50,7 @@ apptainer exec \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
+  --bind /usr/local/cuda-12.3/bin:/usr/local/cuda/bin \
+  --bind /usr/local/cuda-12.3/lib64:/usr/local/cuda/lib64 \
   container_models.sif \
   Rscript --no-init-file /mnt/inst/targets/targets_start.R

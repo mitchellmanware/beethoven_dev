@@ -5,9 +5,10 @@ slurm/*
 
 _targets/*
 
-
 input/*
 
 inst/extdata/*
 
 *.out
+
+*.qs

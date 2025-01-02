@@ -13,14 +13,22 @@ From: rocker/ml-verse:latest
     apt-get install -y fonts-dejavu fonts-liberation fonts-noto \
         fonts-unifont
 
+    # Add NVIDIA repository for CUDA 12.3 and install CUDA package
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-12-3_12.3.0-1_amd64.deb
+    dpkg -i cuda-12-3_12.3.0-1_amd64.deb
+    apt-get update
+
+    # Install CUDA Toolkit and runtime
+    apt-get install -y cuda-toolkit-12-3 cuda-runtime-12-3
+
+    # Install NVIDIA driver libraries compatible with host version
+    apt-get install -y nvidia-driver-libs=545.23.06
+
     # Set locale for the environment
-    echo "LANG=en_US.UTF-8" >> /etc/default/locale
-    echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale
     export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
-
-    # Install CUDA toolkit with nvcc
-    # apt-get install -y --no-install-recommends cuda
+    echo "LANG=en_US.UTF-8" > /etc/locale.conf
+    echo "LC_ALL=en_US.UTF-8" >> /etc/locale.conf
 
     # Create directories
     mkdir /pipeline
@@ -30,9 +38,9 @@ From: rocker/ml-verse:latest
     # Install R packages
     Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
         'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
-        'nanonext', 'torch'))"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-1219')"
+        'torch', 'nanonext'))"
     Rscript -e "torch::install_torch(version = 'latest', type = 'gpu')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev')"
 
 %environment
     # Set locale for the container environment
