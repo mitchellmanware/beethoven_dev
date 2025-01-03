@@ -1,0 +1,88 @@
+BootStrap: docker
+From: nvidia/cuda:12.3.0-base-ubuntu22.04
+
+%post
+    # Set environment variables for Ubuntu version, CRAN repository, and locale
+    export UBUNTU_VERSION=${UBUNTU_VERSION:-focal}
+    export CRAN_LINUX_VERSION=${CRAN_LINUX_VERSION:-cran40}
+    export DEBIAN_FRONTEND=noninteractive
+    export R_HOME=${R_HOME:-/usr/lib/R}
+
+    # Update system and install necessary dependencies
+    apt-get update && apt-get install -y \
+        software-properties-common \
+        curl \
+        gnupg \
+        ca-certificates \
+        libcurl4-openssl-dev \
+        libxml2-dev \
+        libssl-dev \
+        libgdal-dev \
+        libproj-dev \
+        libgeos-dev \
+        libv8-dev \
+        libsodium-dev \
+        libgit2-dev \
+        libprotobuf-dev \
+        protobuf-compiler \
+        pkg-config \
+        unzip \
+        wget \
+        git \
+        libicu-dev \
+        libblas-dev \
+        liblapack-dev \
+        libcurl4-openssl-dev \
+        libgit2-dev \
+        libprotobuf-dev \
+        python3 \
+        python3-pip \
+        python3-dev \
+        python3-setuptools \
+        gfortran \
+        libreadline-dev \
+        tzdata \
+        libx11-dev \
+        libxt-dev \
+        libxmu-dev \
+        libbz2-dev
+
+    # Add CRAN repository for R
+    echo "deb http://cloud.r-project.org/bin/linux/ubuntu ${UBUNTU_VERSION}-${CRAN_LINUX_VERSION}/" >> /etc/apt/sources.list
+    gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    gpg -a --export E298A3A825C0D65DFD57CBB651716619E084DAB9 | apt-key add -
+
+    # Manually download and install R 4.4.2 from the CRAN archive
+    wget https://cran.r-project.org/src/base/R-4/R-4.4.2.tar.gz
+    tar -xvzf R-4.4.2.tar.gz
+    cd R-4.4.2
+    ./configure --enable-R-shlib
+    make
+    make install
+    echo "options(repos = c(CRAN = 'https://cloud.r-project.org'))" >> /usr/local/lib/R/etc/Rprofile.site
+
+    # Install R packages (mimicking ML-verse setup)
+    Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
+        'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
+        'torch', 'nanonext'))"
+    Rscript -e "torch::install_torch(version = 'latest', type = 'gpu')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev')"
+
+    # Clean up apt cache and temporary files to reduce container size
+    rm -rf /var/lib/apt/lists/*
+    rm -rf R-4.4.2.tar.gz
+
+%environment
+    # Set the R library paths and CUDA-related environment variables
+    export R_LIBS_USER=/usr/local/lib/R/site-library
+    export PATH=$PATH:/usr/local/bin
+    export CUDA_HOME=/usr/local/cuda
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+
+%runscript
+    # Define the default run behavior of the container
+    echo "This container is ready for R-based machine learning tasks with CUDA 12.3.0."
+
+%labels
+    basic machine learning with targets and crew plus unicode text; built \
+    with NVIDIA CUDA 12.3.0.
