@@ -1,7 +1,3 @@
-################################################################################
-############################         STAGE          ############################
-cat("Running", Sys.getenv("BEETHOVEN"), "targets...\n")
-
 ############################        LIBPATHS        ############################
 # Exclude user-specific and host paths from available library paths.
 .libPaths(
@@ -35,18 +31,17 @@ Sys.getenv("PATH")
 cat("Active LD_LIBRARY_PATH:\n")
 Sys.getenv("LD_LIBRARY_PATH")
 
-############################         TORCH          ############################
-# Check for torch and cuda installations.
-if (Sys.getenv("BEETHOVEN") == "models") {
-  # Check torch::torch_tensor().
-  cat("torch::cuda_device_count():\n")
-  torch::cuda_device_count()
-}
+############################           DEV          ############################
+library(torch)
 
-############################      RUN PIPELINE      ############################
-targets::tar_make(reporter = "verbose_positives")
-# if (Sys.getenv("BEETHOVEN") == "covariates") {
-#   targets::tar_make(reporter = "verbose_positives")
-# } else {
-#   targets::tar_make_clustermq(workers = 4, reporter = "verbose_positives")
-# }
+cat("torch::torch_is_installed()\n")
+torch::torch_is_installed()
+
+cat("torch::cuda_is_available()()\n")
+torch::cuda_is_available()
+
+cat("torch::cuda_device_count()\n")
+torch::cuda_device_count()
+
+cat("torch::torch_current_device()\n")
+torch::torch_tensor(matrix(1:10, ncol = 2), device = "cuda")
