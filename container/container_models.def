@@ -86,7 +86,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
         'lightgbm'))"
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
 
 %environment
     # Set locale and CUDA environment variables
