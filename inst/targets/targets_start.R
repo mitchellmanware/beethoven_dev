@@ -39,14 +39,9 @@ Sys.getenv("LD_LIBRARY_PATH")
 # Check for torch and cuda installations.
 if (Sys.getenv("BEETHOVEN") == "models") {
   # Check torch::torch_tensor().
-  cat("torch::cuda_device_count():\n")
-  torch::cuda_device_count()
+  cat("torch::cuda_is_available():\n")
+  torch::cuda_is_available()
 }
 
 ############################      RUN PIPELINE      ############################
 targets::tar_make(reporter = "verbose_positives")
-# if (Sys.getenv("BEETHOVEN") == "covariates") {
-#   targets::tar_make(reporter = "verbose_positives")
-# } else {
-#   targets::tar_make_clustermq(workers = 4, reporter = "verbose_positives")
-# }

@@ -47,5 +47,5 @@ apptainer exec \
   --bind $PWD/_targets:/opt/_targets \
   --bind /run/munge:/run/munge \
   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
-  container/container_models_clustermq.sif \
+  container_models.sif \
   Rscript --no-init-file /mnt/inst/targets/targets_start.R

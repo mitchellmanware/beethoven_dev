@@ -4,11 +4,11 @@ target_models <-
     ############################################################################
     #########################             DEV             ######################
     targets::tar_target(
-      models_torchtensor,
+      models_cudadevicecount,
       command = torch::cuda_device_count(),
-      # resources = targets::tar_resources(
-      #   crew = targets::tar_resources_crew(controller = "gpu_controller")
-      # ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "gpu_controller")
+      ),
       description = "Torch tensor test | models"
     )
     ############################################################################
