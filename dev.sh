@@ -11,10 +11,15 @@
 #SBATCH --output=slurm/gpu_%j.out
 #SBATCH --error=slurm/gpu_%j.err
 
+# Rscript --no-init-file dev.R
+
 apptainer exec \
   --nv \
   --bind $PWD:/mnt \
+  --bind $PWD/inst:/inst \
+  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
+  --bind $PWD/_targets:/opt/_targets \
   --bind /run/munge:/run/munge \
-  --bind /ddn/gs1/tools/slurm/etc/slurm:/etc/slurm \
+  --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
   container_models.sif \
   Rscript --no-init-file /mnt/dev.R

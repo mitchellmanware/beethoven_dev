@@ -37,7 +37,7 @@ library(torch)
 cat("torch::torch_is_installed()\n")
 torch::torch_is_installed()
 
-cat("torch::cuda_is_available()()\n")
+cat("torch::cuda_is_available()\n")
 torch::cuda_is_available()
 
 cat("torch::cuda_device_count()\n")
