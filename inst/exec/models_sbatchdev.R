@@ -1,4 +1,6 @@
 ############################        SETTINGS        ############################
+cat("Running non-target {beethoven}", Sys.getenv("BEETHOVEN"), "...\n")
+
 # Set paths for R, CUDA, and LD_LIBRARY_PATH, and check for CUDA availability.
 beethoven:::sys_beethoven()
 
@@ -19,7 +21,10 @@ cat("torch::cuda_is_available():\n")
 torch::cuda_is_available()
 
 ############################           DEV          ############################
-torch::torch_save(
-  torch::torch_tensor(matrix(1:10, ncol = 2), device = "cuda"),
-  "/inst/extdata/torch_tensor"
-)
+models_torchtensor <- "/inst/extdata/models_torchtensor.pt"
+if (!file.exists(models_torchtensor)) {
+  torch::torch_save(
+    torch::torch_tensor(matrix(1:10, ncol = 2), device = "cuda"),
+    path = models_torchtensor
+  )
+}

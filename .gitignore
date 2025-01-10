@@ -1,14 +1,14 @@
+# container images
 *.sif
-
+# targets (objects, metadata, crew)
 _targets/
+# slurm (output and error logs)
 slurm/*
-
-_targets/*
-
+# data files
 input/*
-
+# external data
 inst/extdata/*
-
+# output logs
 *.out
-
+# qs files
 *.qs

@@ -11,8 +11,6 @@
 #SBATCH --output=slurm/gpu_%j.out
 #SBATCH --error=slurm/gpu_%j.err
 
-# Rscript --no-init-file dev.R
-
 apptainer exec \
   --nv \
   --bind $PWD:/mnt \
@@ -22,4 +20,4 @@ apptainer exec \
   --bind /run/munge:/run/munge \
   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
   container_models.sif \
-  Rscript --no-init-file /mnt/dev.R
+  Rscript --no-init-file /inst/exec/models_sbatchdev.R
