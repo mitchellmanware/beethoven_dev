@@ -38,16 +38,7 @@ apptainer exec \
 # Set environmental variable to indicate model fitting targets.
 export BEETHOVEN=models
 
-# Fit models via container_models.sif **external to the targets pipeline**.
-apptainer exec \
-  --nv \
-  --bind $PWD:/mnt \
-  --bind $PWD/inst:/inst \
-  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-  --bind $PWD/_targets:/opt/_targets \
-  container_models.sif \
-  Rscript --no-init-file /mnt/inst/exec/model_sbatchdev.R
-
+# Fit models via container_models.sif external to the targets pipeline.
 apptainer exec \
   --nv \
   --bind $PWD:/mnt \
