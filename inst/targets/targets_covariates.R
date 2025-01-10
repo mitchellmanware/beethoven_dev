@@ -98,21 +98,4 @@ target_covariates <-
       ),
       description = "data.table of NARR features | fit"
     )
-    ,
-    ############################################################################
-    ############################################################################
-    #########################             DEV             ######################
-    targets::tar_target(
-      covariates_sessionInfo,
-      command = sessionInfo(),
-      description = "Session information | covariates"
-    )
-    ,
-    targets::tar_target(
-      covariates_beethovenEnv,
-      command = Sys.getenv("BEETHOVEN"),
-      description = "Beethoven environment variable | covariates"
-    )
-    ############################################################################
-    ############################################################################
   )
