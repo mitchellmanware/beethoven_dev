@@ -2,30 +2,13 @@
 ############################         STAGE          ############################
 cat("Running", Sys.getenv("BEETHOVEN"), "targets...\n")
 
-############################        LIBPATHS        ############################
-# Exclude user-specific and host paths from available library paths.
-.libPaths(
-  grep(
-    paste0("biotools|", Sys.getenv("USER")), .libPaths(),
-    value = TRUE,
-    invert = TRUE
-  )
-)
+############################        SETTINGS        ############################
+# Set paths for R, CUDA, and LD_LIBRARY_PATH, and check for CUDA availability.
+beethoven:::sys_beethoven()
+
 # Check .libPaths().
 cat("Active library paths:\n")
 .libPaths()
-
-############################      ENVIRONMENT       ############################
-# Set environmental variables relative to container paths.
-Sys.setenv(
-  "PATH" = paste0(
-    "/usr/local/cuda/bin:", "/usr/local/nvidia/bin:", "/usr/local/cuda/bin:",
-    "/usr/local/sbin:", "/usr/local/bin:", "/usr/sbin:", "/usr/bin:",
-    "/sbin:", "/bin"
-  ),
-  "LD_LIBRARY_PATH" = "/usr/local/cuda/lib64",
-  "CUDA_HOME" = "/usr/local/cuda"
-)
 
 # Check PATH.
 cat("Active PATH:\n")
@@ -44,4 +27,4 @@ if (Sys.getenv("BEETHOVEN") == "models") {
 }
 
 ############################      RUN PIPELINE      ############################
-targets::tar_make(reporter = "verbose_positives")
+targets::tar_make(models_cudadevicecount, reporter = "verbose_positives")
