@@ -46,7 +46,7 @@ apptainer exec \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
   container_models.sif \
-  Rscript --no-init-file /mnt/inst/exec/model_mlp.R
+  /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/exec/model_mlp.R
 
 #############################      POST MODELS     #############################
 # Run post-model targets via container_models.sif.
@@ -57,4 +57,4 @@ apptainer exec \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
   container_models.sif \
-  Rscript --no-init-file /mnt/inst/targets/targets_start.R
+  /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R
