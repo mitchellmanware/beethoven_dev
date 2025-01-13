@@ -1,4 +1,0 @@
-# Set environment variables for CUDA and library paths
-PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-LD_LIBRARY_PATH=/usr/local/cuda
-CUDA_HOME=/usr/local/cuda

@@ -29,12 +29,6 @@ target_initiate <-
     )
     ,
     targets::tar_target(
-      chr_iter_radii,
-      command = c(100, 1000),
-      description = "Buffer radii"
-    )
-    ,
-    targets::tar_target(
       list_download_args,
       command = list(
         unzip = TRUE,

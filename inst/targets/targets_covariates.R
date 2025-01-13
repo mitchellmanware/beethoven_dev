@@ -114,30 +114,13 @@ target_covariates <-
       iteration = "list",
       description = "Calculate NARR features | fit"
     )
-    ,
-    targets::tar_target(
-      dt_feat_calc_narr,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_calc_narr),
-        by = c("site_id", "time")
-      ),
-      description = "data.table of NARR features | fit"
-    )
-    ,
-    ############################################################################
-    ############################################################################
-    #########################             DEV             ######################
-    targets::tar_target(
-      covariates_sessionInfo,
-      command = sessionInfo(),
-      description = "Session information | covariates"
-    )
-    ,
-    targets::tar_target(
-      covariates_beethovenEnv,
-      command = Sys.getenv("BEETHOVEN"),
-      description = "Beethoven environment variable | covariates"
-    )
-    ############################################################################
-    ############################################################################
+    # ,
+    # targets::tar_target(
+    #   dt_feat_calc_narr,
+    #   command = beethoven::reduce_merge(
+    #     beethoven::reduce_list(list_feat_calc_narr),
+    #     by = c("site_id", "time")
+    #   ),
+    #   description = "data.table of NARR features | fit"
+    # )
   )

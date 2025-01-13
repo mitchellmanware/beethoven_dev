@@ -9,21 +9,23 @@ default_controller <- crew::crew_controller_local(
   workers = 25,
   seconds_idle = 30
 )
+gpu_scriptlines <- glue::glue(
+  "#SBATCH --job-name=devgpu \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --output=slurm/devgpu_%j.out \
+  #SBATCH --error=slurm/devgpu_%j.err \
+  apptainer exec --nv --bind $PWD:/mnt --bind $PWD/inst:/inst ",
+  "--bind $PWD/input:/input --bind $PWD/_targets:/opt/_targets ",
+  "container_models.sif \\"
+)
 gpu_controller <- crew.cluster::crew_controller_slurm(
   name = "gpu_controller",
-  workers = 4,
+  workers = 1,
   seconds_idle = 30,
-  verbose = TRUE,
-  script_lines = paste0(
-    "#!/bin/bash\n\n",
-    "#SBATCH --job-name=dev_gpu\n",
-    "#SBATCH --partition=geo\n",
-    "#SBATCH --ntasks=1\n",
-    "#SBATCH --mem=16G\n",
-    "#SBATCH --cpus-per-task=4\n",
-    "#SBATCH --gres=gpu:1\n",
-    "#SBATCH --output=slurm/dev_gpu%j.out\n",
-    "#SBATCH --error=slurm/dev_gpu%j.err\n\n"
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = gpu_scriptlines
   )
 )
 
@@ -46,7 +48,11 @@ targets::tar_option_set(
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    default_controller, gpu_controller
+    default_controller,
+    gpu_controller
+  ),
+  resources = targets::tar_resources(
+    crew = targets::tar_resources_crew(controller = "default_controller")
   ),
   retrieval = "worker"
 )

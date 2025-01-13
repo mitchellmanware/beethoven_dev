@@ -1,6 +1,6 @@
 ################################################################################
 ############################         STAGE          ############################
-cat("Running", Sys.getenv("BEETHOVEN"), "targets...\n")
+cat("Running {beethoven}", Sys.getenv("BEETHOVEN"), "targets...\n")
 
 ############################        SETTINGS        ############################
 # Set paths for R, CUDA, and LD_LIBRARY_PATH, and check for CUDA availability.
@@ -27,4 +27,4 @@ if (Sys.getenv("BEETHOVEN") == "models") {
 }
 
 ############################      RUN PIPELINE      ############################
-targets::tar_make(models_cudadevicecount, reporter = "verbose_positives")
+targets::tar_make(reporter = "verbose_positives")
