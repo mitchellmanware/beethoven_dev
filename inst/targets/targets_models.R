@@ -4,12 +4,9 @@ target_models <-
     ############################################################################
     #########################             DEV             ######################
     targets::tar_target(
-      models_cudadevicecount,
-      command = torch::cuda_device_count(),
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "gpu_controller")
-      ),
-      description = "Torch tensor test | models"
+      model_mlp,
+      command = torch::torch_load("/inst/extdata/model_mlp.pt"),
+      format = "torch"
     )
     ,
     targets::tar_target(

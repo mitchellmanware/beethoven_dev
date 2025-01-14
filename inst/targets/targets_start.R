@@ -1,6 +1,6 @@
 ################################################################################
 ############################         STAGE          ############################
-cat("Running {beethoven}", Sys.getenv("BEETHOVEN"), "targets...\n")
+cat("Running {beethoven}", Sys.getenv("BEETHOVEN"), "targets ...\n")
 
 ############################        SETTINGS        ############################
 # Set paths for R, CUDA, and LD_LIBRARY_PATH, and check for CUDA availability.
@@ -17,14 +17,6 @@ Sys.getenv("PATH")
 # Check LD_LIBRARY_PATH
 cat("Active LD_LIBRARY_PATH:\n")
 Sys.getenv("LD_LIBRARY_PATH")
-
-############################         TORCH          ############################
-# Check for torch and cuda installations.
-if (Sys.getenv("BEETHOVEN") == "models") {
-  # Check torch::torch_tensor().
-  cat("torch::cuda_is_available():\n")
-  torch::cuda_is_available()
-}
 
 ############################      RUN PIPELINE      ############################
 targets::tar_make(reporter = "verbose_positives")
