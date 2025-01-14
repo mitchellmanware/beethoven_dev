@@ -29,7 +29,7 @@ export BEETHOVEN=covariates
 apptainer exec \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
-  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
+  --bind $PWD/input:/input \
   --bind $PWD/_targets:/opt/_targets \
   container_covariates.sif \
   Rscript --no-init-file /mnt/inst/targets/targets_start.R
@@ -43,7 +43,7 @@ apptainer exec \
   --nv \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
-  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
+  --bind $PWD/input:/input \
   --bind $PWD/_targets:/opt/_targets \
   container_models.sif \
   /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/exec/model_mlp.R
