@@ -32,20 +32,24 @@ From: rocker/geospatial:latest
     mkdir /opt/_targets
 
     # Install R packages
-    Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
-        'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
-        'nanonext'))"
-    Rscript -e "pak::pak('NIEHS/amadeus')"
+    Rscript -e "install.packages(c('pak', 'devtools'))"
+    Rscript -e "devtools::install_version('targets', version = '1.10.0')"
+    Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
+        'bonsai', 'qs2'))"
+    Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
+    Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
+    Rscript -e "pak::pak('NIEHS/amadeus@1.2.3')"
     Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
 
-
 %environment
-    # Set locale for the container environment
+    # Set locale and CUDA environment variables
     export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
     export TERM=xterm-256color
 
 %runscript
+    # Define the default run behavior of the container
+    echo "This container is ready for R-based geospatial analyses."
 
 %labels
     basic geospatial with targets and crew plus unicode text so the target \
