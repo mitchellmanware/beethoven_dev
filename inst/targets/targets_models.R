@@ -5,15 +5,18 @@ target_models <-
     #########################             DEV             ######################
     targets::tar_target(
       dt_feat_calc_xyt_devsubset,
-      command = qs::qread("inst/extdata/dt_feat_calc_xyt_devsubset.qs"),
+      command = data.table::data.table(
+        qs::qread("inst/extdata/dt_feat_calc_xyt_devsubset.qs")
+      ),
       description = "Imputed features + AQS sites (SUBSET FOR DEV)"
     )
     ,
     targets::tar_target(
       name = df_learner_type,
       command = beethoven::assign_learner_cv(
-        learner = "lgb",
-        cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        learner = "xgb",
+        cv_mode = c("spatial"),
+        # cv_mode = c("spatial", "temporal", "spatiotemporal"),
         cv_rep = 2L,
         num_device = 1L
       ) %>%
@@ -29,20 +32,20 @@ target_models <-
           cv_make_fun = beethoven::generate_cv_index_sp,
           v = 10L,
           method = "snake"
-        ),
-        temporal = list(
-          cv_fold = 10L,
-          time_col = "time",
-          window = 14L
-        ),
-        spatiotemporal = list(
-          target_cols = c("lon", "lat", "time"),
-          cv_make_fun = beethoven::generate_cv_index_spt,
-          ngroup_init = 8L,
-          cv_pairs = 10L,
-          preprocessing = "normalize",
-          pairing = "1"
         )
+        # temporal = list(
+        #   cv_fold = 10L,
+        #   time_col = "time",
+        #   window = 14L
+        # )
+        # spatiotemporal = list(
+        #   target_cols = c("lon", "lat", "time"),
+        #   cv_make_fun = beethoven::generate_cv_index_spt,
+        #   ngroup_init = 8L,
+        #   cv_pairs = 10L,
+        #   preprocessing = "normalize",
+        #   pairing = "1"
+        # )
       )
     )
     ,
@@ -54,17 +57,17 @@ target_models <-
         #   dropout = 1 / seq(5, 2, -1),
         #   activation = c("relu", "leaky_relu"),
         #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
-        # ),
-        # xgb = expand.grid(
-        #   mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
-        #   trees = seq(1000, 3000, 1000),
-        #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
-        # ),
-        lgb = expand.grid(
+        # )
+        xgb = expand.grid(
           mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
           trees = seq(1000, 3000, 1000),
           learn_rate = c(0.1, 0.05, 0.01, 0.005)
         )
+        # lgb = expand.grid(
+        #   mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+        #   trees = seq(1000, 3000, 1000),
+        #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
+        # )
         # elnet = expand.grid(
         #   mixture = seq(0, 1, length.out = 21),
         #   penalty = 10 ^ seq(-3, 5, 1)
@@ -81,8 +84,9 @@ target_models <-
         model = beethoven::switch_model(
           model_type = df_learner_type$learner,
           device = "cuda"
-          # device = df_learner_type$device
         ),
+        ##### specify `NULL` folds to trigger manual `cv_mode` #####
+        folds = NULL,
         cv_mode = df_learner_type$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],
         tune_mode = "grid",
@@ -92,7 +96,8 @@ target_models <-
         xvar = seq(5, ncol(dt_feat_calc_xyt_devsubset)),
         nthreads = 2L,
         trim_resamples = FALSE,
-        return_best = TRUE
+        return_best = TRUE,
+        metric = "rmse"
       ),
       pattern = map(df_learner_type),
       iteration = "list",
