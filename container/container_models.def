@@ -53,10 +53,10 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
         libfribidi-dev \
         slurm-client \
         lmod \
-        libboost-dev \
-        libboost-system-dev \
-        libboost-filesystem-dev \
-        libboost-chrono-dev \
+        libboost-all-dev \
+        # libboost-filesystem-dev \
+        # libboost-system-dev \
+        # libboost-program-options-dev \
         build-essential \
         && rm -rf /var/lib/apt/lists/*
 
@@ -90,23 +90,23 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     mkdir /opt/_targets
 
     # Build and install LightGBM with GPU support
-    apt-get update && apt-get install -y ocl-icd-opencl-dev
     Rscript -e "install.packages(c('R6', 'data.table', 'jsonlite', 'knitr'), \
         repos = 'https://cran.r-project.org')"
     rm -rf LightGBM
-    git clone --recursive https://github.com/mitchellmanware/LightGBM.git
+    git clone --recursive https://github.com/microsoft/LightGBM.git
     cd LightGBM
-    git checkout beethoven
     Rscript build_r.R \
-        --use-gpu \
-        --use-cuda \
-        --opencl-library=/usr/lib/x86_64-linux-gnu/libOpenCL.so \
-        --boost-librarydir=/usr/lib/x86_64-linux-gnu
+      --use-gpu \
+      --no-build-vignettes
+    cd ..
+
+    # Build and install xgboost with GPU support
+    wget https://github.com/dmlc/xgboost/releases/download/v2.1.3/xgboost_r_gpu_linux_2.1.3.tar.gz    
+    R CMD INSTALL ./xgboost_r_gpu_linux_2.1.3.tar.gz
 
     # Install R packages (mimicking rocker/ml-verse setup)
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
-    Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
     Rscript -e "install.packages(c('tarchetypes', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
         'torch', 'tidyverse', 'glmnet'))"
