@@ -1,74 +1,111 @@
-generate_cv_index_sp_dev <-
+fit_base_tune_dev <-
   function(
-    data,
-    target_cols = c("lon", "lat"),
-    ...
+    recipe,
+    model,
+    resample,
+    tune_mode = c("bayes", "grid"),
+    grid = NULL,
+    iter_bayes = 10L,
+    trim_resamples = TRUE,
+    return_best = TRUE,
+    data_full = NULL,
+    metric = "rmse"
   ) {
+    stopifnot("data_full must be entered." = !is.null(data_full))
+    tune_mode <- match.arg(tune_mode)
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(recipe) %>%
+      workflows::add_model(model)
 
-    data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
-    cv_index <-
-      rlang::inject(
-        spatialsample::spatial_block_cv(
-          data_sf,
-          !!!list(...)
+    if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = FALSE,
+          save_workflow = TRUE
         )
-      )
-
-    # retrieve in_id
-    data_rowid <- seq_len(nrow(data))
-    newcv <- data_rowid
-
-    if (
-      !all(
-        !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
-      )
-    ) {
-      newcv <-
-        lapply(
-          cv_index$splits,
-          function(x) list(analysis = x$in_id, assessment = x$out_id)
+      base_wftune <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = resample,
+          grid = grid,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
+          control = wf_config
         )
     } else {
-      cv_index <- lapply(cv_index$splits, function(x) x$in_id)
-      for (i in seq_along(cv_index)) {
-        newcv[setdiff(data_rowid, cv_index[[i]])] <- i
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = FALSE,
+          save_workflow = TRUE
+        )
+      base_wftune <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = resample,
+          iter = iter_bayes,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mae,
+            yardstick::mape,
+            yardstick::rsq
+          ),
+          control = wf_config
+        )
+    }
+    # DEVELOPMENT CHANGE
+    # mm-0904 Drop base_wftune from return when trim_resamples = TRUE
+    # due to large data size. 1 iter > 25Gb
+    # if (trim_resamples) {
+    #   base_wftune$splits <- NA
+    # }
+    if (return_best) {
+      # Select the best hyperparameters
+      metric <- match.arg(metric, c("rmse", "rsq", "mae"))
+      base_wfparam <-
+        tune::select_best(
+          base_wftune,
+          metric = metric
+        )
+      # finalize workflow with the best tuned hyperparameters
+      base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
+
+      # DEVELOPMENT CHANGE
+      # mm-0904 unlist multi-layered hidden units if mlp model
+      if (model$engine == "brulee" && is.list(grid$hidden_units)) {
+        base_wfresult$fit$actions$model$spec$args$hidden_units <-
+          unlist(
+            rlang::quo_get_expr(
+              base_wfresult$fit$actions$model$spec$args$hidden_units
+            )
+          )
       }
+
+      # Best-fit model
+      base_wf_fit_best <- parsnip::fit(base_wfresult, data = data_full)
+      # Prediction with the best model
+      base_wf_pred_best <-
+        stats::predict(base_wf_fit_best, new_data = data_full)
+
+      base_wflist <-
+        list(
+          base_prediction = base_wf_pred_best,
+          base_parameter = base_wfparam,
+          best_performance = base_wftune
+        )
     }
-
-    return(newcv)
-  }
-
-make_subdata_dev <- function(
-  data,
-  n = NULL,
-  p = 0.3,
-  ngroup_init = NULL
-) {
-  if (is.null(n) && is.null(p)) {
-    stop("Please provide either n or p.")
-  }
-  if (!is.null(ngroup_init) && ngroup_init <= 0) {
-    stop("ngroup_init must be a positive integer.")
-  }
-
-  nr <- seq_len(nrow(data))
-
-  if (!is.null(n)) {
-    if (!is.null(ngroup_init)) {
-      n <- floor(n / ngroup_init) * ngroup_init
+    # DEVELOPMENT CHANGE
+    # mm-0904 see above
+    if (trim_resamples) {
+      base_wflist <- base_wflist[-3]
     }
-    nsample <- sample(nr, n)
-  } else {
-    sample_size <- ceiling(nrow(data) * p)
-    if (!is.null(ngroup_init)) {
-      sample_size <- floor(sample_size / ngroup_init) * ngroup_init
-    }
-    nsample <- sample(nr, sample_size)
+    return(base_wflist)
   }
-
-  rowindex <- nsample
-  data_name <- as.character(substitute(data))
-  attr(rowindex, "object_origin") <- data_name[length(data_name)]
-
-  return(rowindex)
-}

@@ -15,8 +15,7 @@ target_models <-
       name = df_learner_type,
       command = beethoven::assign_learner_cv(
         learner = "xgb",
-        cv_mode = c("spatial"),
-        # cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        cv_mode = c("temporal"),
         cv_rep = 2L,
         num_device = 1L
       ) %>%
@@ -27,17 +26,17 @@ target_models <-
     targets::tar_target(
       name = list_base_args_cv,
       command = list(
-        spatial = list(
-          target_cols = c("lon", "lat"),
-          cv_make_fun = beethoven::generate_cv_index_sp,
-          v = 10L,
-          method = "snake"
-        )
-        # temporal = list(
-        #   cv_fold = 10L,
-        #   time_col = "time",
-        #   window = 14L
+        # spatial = list(
+        #   target_cols = c("lon", "lat"),
+        #   cv_make_fun = beethoven::generate_cv_index_sp,
+        #   v = 10L,
+        #   method = "snake"
         # )
+        temporal = list(
+          cv_fold = 10L,
+          time_col = "time",
+          window = 14L
+        )
         # spatiotemporal = list(
         #   target_cols = c("lon", "lat", "time"),
         #   cv_make_fun = beethoven::generate_cv_index_spt,
@@ -85,7 +84,6 @@ target_models <-
           model_type = df_learner_type$learner,
           device = "cuda"
         ),
-        ##### specify `NULL` folds to trigger manual `cv_mode` #####
         folds = NULL,
         cv_mode = df_learner_type$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],

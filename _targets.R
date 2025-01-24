@@ -42,7 +42,7 @@ targets::tar_option_set(
   packages = c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch", "bonsai", "xgboost"
+    "torch", "bonsai", "dials", "xgboost"
   ),
   repository = "local",
   error = "continue",
@@ -68,7 +68,7 @@ targets::tar_source("inst/targets/targets_critical.R")
 # targets::tar_source("inst/targets/targets_covariates.R")
 targets::tar_source("inst/targets/targets_debug.R")
 
-source("/mnt/function.R")
+# source("/mnt/function.R")
 
 ###########################      SYSTEM SETTINGS      ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {

@@ -11,9 +11,8 @@ target_models <-
     targets::tar_target(
       df_learner_type,
       command = beethoven::assign_learner_cv(
-        learner = "mlp",
-        cv_mode = c("spatiotemporal"),
-        # cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        learner = "xgb",
+        cv_mode = c("temporal"),
         cv_rep = 2L,
         num_device = 1L
       ) %>%
@@ -24,24 +23,10 @@ target_models <-
     targets::tar_target(
       list_base_args_cv,
       command = list(
-        # spatial = list(
-        #   target_cols = c("lon", "lat"),
-        #   cv_make_fun = beethoven::generate_cv_index_sp,
-        #   v = 10L,
-        #   method = "snake"
-        # )
-        # temporal = list(
-        #   cv_fold = 10L,
-        #   time_col = "time",
-        #   window = 14L
-        # )
-        spatiotemporal = list(
-          target_cols = c("lon", "lat", "time"),
-          cv_make_fun = beethoven::generate_cv_index_spt,
-          ngroup_init = 8L,
-          cv_pairs = 10L,
-          preprocessing = "normalize",
-          pairing = "1"
+        temporal = list(
+          cv_fold = 10L,
+          time_col = "time",
+          window = 14L
         )
       )
     )
@@ -49,10 +34,9 @@ target_models <-
     targets::tar_target(
       list_base_params_candidates,
       command = list(
-        mlp = expand.grid(
-          hidden_units = c(1024, 512, 256, 128, 64),
-          dropout = 1 / seq(5, 2, -1),
-          activation = c("relu", "leaky_relu"),
+        xgb = expand.grid(
+          mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+          trees = seq(1000, 3000, 1000),
           learn_rate = c(0.1, 0.05, 0.01, 0.005)
         )
       )
@@ -61,18 +45,29 @@ target_models <-
     targets::tar_target(
       list_baselearner_params,
       command = list(
-        learner = "mlp",
+        learner = "xgb",
         dt_full = dt_feat_calc_xyt_devsubset[1:106144, ],
         r_subsample = 0.3,
-        model = beethoven::switch_model(
-          model_type = "mlp",
-          device = "cuda"
-        ),
+        # model = beethoven::switch_model(
+        #   model_type = "xgb",
+        #   device = "cuda"
+        # ),
+        model = parsnip::boost_tree(
+          mtry = parsnip::tune(),
+          trees = parsnip::tune(),
+          learn_rate = parsnip::tune()
+        ) %>%
+          parsnip::set_engine(
+            "xgboost",
+            device = "cuda",
+            params = list(tree_method = "gpu_hist")
+          ) %>%
+          parsnip::set_mode("regression"),
         folds = 5L,
-        cv_mode = "spatiotemporal",
-        args_generate_cv = list_base_args_cv$spatiotemporal,
+        cv_mode = "temporal",
+        args_generate_cv = list_base_args_cv$temporal,
         tune_mode = "grid",
-        tune_grid_in = list_base_params_candidates$mlp,
+        tune_grid_in = list_base_params_candidates$xgb,
         tune_grid_size = 2L,
         tune_bayes_iter = 10L,
         yvar = "Arithmetic.Mean",
@@ -85,8 +80,19 @@ target_models <-
     )
     ,
     targets::tar_target(
+      base_recipe,
+      command = recipes::recipe(
+        dt_sample[1, ]
+      ) %>%
+        recipes::update_role(list_baselearner_params$xvar) %>%
+        recipes::update_role(
+          list_baselearner_params$yvar, new_role = "outcome"
+        )
+    )
+    ,
+    targets::tar_target(
       dt_sample_rowidx,
-      command = make_subdata_dev(
+      command = beethoven:::make_subdata(
         list_baselearner_params$dt_full,
         p = list_baselearner_params$r_subsample,
         ngroup_init = 8L
@@ -96,17 +102,6 @@ target_models <-
     targets::tar_target(
       dt_sample,
       command = list_baselearner_params$dt_full[dt_sample_rowidx, ]
-    )
-    ,
-    targets::tar_target(
-      base_recipe,
-      command = recipes::recipe(
-        dt_sample[1, ]
-      ) %>%
-        recipes::update_role(list_baselearner_params$xvar) %>%
-        recipes::update_role(
-          list_baselearner_params$yvar, new_role = "outcome"
-        )
     )
     ,
     targets::tar_target(
@@ -135,16 +130,6 @@ target_models <-
       )
     )
     ,
-    # targets::tar_target(
-    #   cv_index,
-    #   command = generate_cv_index_sp_dev(
-    #     data = args_generate_cv$data,
-    #     target_cols = args_generate_cv$target_cols,
-    #     v = list_baselearner_params$args_generate_cv$v,
-    #     method = list_baselearner_params$args_generate_cv$method
-    #   )
-    # )
-    # ,
     targets::tar_target(
       cv_index,
       command = beethoven::inject_match(target_fun, args_generate_cv)
@@ -172,8 +157,8 @@ target_models <-
     )
     ,
     targets::tar_target(
-      base_wftune,
-      command = beethoven::fit_base_tune(
+      list_basetune_params,
+      command = list(
         recipe = base_recipe,
         model = list_baselearner_params$model,
         resample = base_vfold,
@@ -184,11 +169,107 @@ target_models <-
         return_best = list_baselearner_params$return_best,
         data_full = list_baselearner_params$dt_full,
         metric = list_baselearner_params$metric
+      )
+    )
+    ,
+    targets::tar_target(
+      base_spec,
+      command = parsnip::boost_tree(
+        mode = "regression",
+        trees = parsnip::tune(),
+        mtry = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
+        parsnip::set_engine(
+          "xgboost",
+          device = "cuda",
+          params = list(tree_method = "gpu_hist")
+        )
+    )
+    ,
+    targets::tar_target(
+      base_flow,
+      command = workflows::workflow() %>%
+        workflows::add_recipe(base_recipe) %>%
+        workflows::add_model(base_spec)
+    )
+    ,
+    targets::tar_target(
+      base_params,
+      command = {
+        mtry_param <- dials::mtry(range(
+          floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L)
+        ))
+        trees_param <- dials::trees(range(
+          seq(1000, 3000, 1000)
+        ))
+        learn_rate_param <- dials::learn_rate(range(
+          c(0.1, 0.05, 0.01, 0.005)
+        ))
+        dials::parameters(mtry_param, trees_param, learn_rate_param)
+      }
+    )
+    ,
+    targets::tar_target(
+      wf_config,
+      command = tune::control_grid(
+        verbose = TRUE,
+        save_pred = FALSE,
+        save_workflow = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      base_wftune,
+      command = tune::tune_grid(
+        base_flow,
+        resamples = list_basetune_params$resample,
+        param_info = base_params,
+        metrics = yardstick::metric_set(
+          yardstick::rmse,
+          yardstick::mape,
+          yardstick::rsq,
+          yardstick::mae
+        ),
+        grid = grid_params,
+        control = wf_config
       ),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_gpu")
       )
     )
+    # ,
+    # targets::tar_target(
+    #   base_wfparam,
+    #   command = tune::select_best(
+    #     base_wftune,
+    #     metric = list_basetune_params$metric,
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   base_wfresult,
+    #   tune::finalize_workflow(base_wf, base_wfparam)
+    # )
+    # ,
+    # targets::tar_target(
+    #   base_wf_fit_best,
+    #   command = parsnip::fit(base_wfresult, list_baselearner_params$dt_full)
+    # )
+    # ,
+    # targets::tar_target(
+    #   base_wf_pred_best,
+    #   command = stats::predict(base_wf_fit_best, new_data = data_full)
+    # )
+    # ,
+    # targets::tar_target(
+    #   base_wflist,
+    #   command = list(
+    #     base_prediction = base_wf_pred_best,
+    #     base_parameter = base_wfparam,
+    #     best_performance = base_wftune
+    #   )
+    # )
     ############################################################################
     ############################################################################
   )
