@@ -41,7 +41,7 @@ targets::tar_option_set(
   packages = c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch", "bonsai", "dials", "lightgbm"# , "xgboost", "glmnet"
+    "torch", "bonsai", "dials", "lightgbm" , "xgboost", "glmnet"
   ),
   repository = "local",
   error = "continue",
