@@ -12,3 +12,5 @@ inst/extdata/*
 *.out
 # qs files
 *.qs
+# save (output and error logs)
+save/*
