@@ -94,14 +94,11 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "install.packages(c('R6', 'data.table', 'jsonlite', 'knitr'), \
         repos = 'https://cran.r-project.org')"
     rm -rf LightGBM
-    git clone --recursive https://github.com/mitchellmanware/LightGBM.git
+    git clone --recursive https://github.com/microsoft/LightGBM
     cd LightGBM
-    git checkout beethoven
     Rscript build_r.R \
-        --use-gpu \
-        --use-cuda \
-        --opencl-library=/usr/lib/x86_64-linux-gnu/libOpenCL.so \
-        --boost-librarydir=/usr/lib/x86_64-linux-gnu
+        --no-build-vignettes \
+        --use-gpu
 
     # Install R packages (mimicking rocker/ml-verse setup)
     Rscript -e "install.packages(c('pak', 'devtools'))"
