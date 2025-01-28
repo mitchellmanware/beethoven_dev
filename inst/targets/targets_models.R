@@ -14,7 +14,7 @@ target_models <-
     targets::tar_target(
       name = df_learner_type,
       command = beethoven::assign_learner_cv(
-        learner = "xgb",
+        learner = "lgb",
         cv_mode = c("temporal"),
         cv_rep = 2L,
         num_device = 1L
@@ -57,16 +57,17 @@ target_models <-
         #   activation = c("relu", "leaky_relu"),
         #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
         # )
-        xgb = expand.grid(
-          mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
-          trees = seq(1000, 3000, 1000),
-          learn_rate = c(0.1, 0.05, 0.01, 0.005)
-        )
-        # lgb = expand.grid(
-        #   mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+        # xgb = expand.grid(
+        #   mtry = c(10, 20, 30, 40),
         #   trees = seq(1000, 3000, 1000),
         #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
         # )
+        lgb = expand.grid(
+          # mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+          # mtry = c(10, 20, 30, 40),
+          trees = seq(1000, 3000, 1000),
+          learn_rate = c(0.1)
+        )
         # elnet = expand.grid(
         #   mixture = seq(0, 1, length.out = 21),
         #   penalty = 10 ^ seq(-3, 5, 1)
@@ -75,23 +76,46 @@ target_models <-
     )
     ,
     targets::tar_target(
+      airline,
+      command = {
+        airline_data <- data.table::fread(
+          "https://www.openml.org/data/download/66526/phpvcoG8S",
+          skip = "@data",
+          header = FALSE
+        )
+        airline_names <- c(
+          "Airline", "Flight", "AirportFrom", "AirportTo",
+          "DayofWeek", "Time", "Length", "Delay"
+        )
+        names(airline_data) <- airline_names
+        airline_data
+      },
+    )
+    ,
+    targets::tar_target(
       name = workflow_learner_base_best,
       command = beethoven::fit_base_learner(
         learner = df_learner_type$learner,
-        dt_full = dt_feat_calc_xyt_devsubset,
+        dt_full = airline,
         r_subsample = 0.3,
-        model = beethoven::switch_model(
-          model_type = df_learner_type$learner,
-          device = "cuda"
-        ),
-        folds = NULL,
+        model = parsnip::boost_tree(
+          mtry = 7,
+          trees = parsnip::tune(),
+          learn_rate = parsnip::tune(),
+        ) %>%
+          parsnip::set_engine(
+            "lightgbm",
+            # device_type = "gpu"
+          ) %>%
+          parsnip::set_mode("regression"),
+        folds = 5L,
         cv_mode = df_learner_type$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],
         tune_mode = "grid",
         tune_grid_in = list_base_params_candidates[[df_learner_type$learner]],
         tune_grid_size = 2L,
-        yvar = "Arithmetic.Mean",
-        xvar = seq(5, ncol(dt_feat_calc_xyt_devsubset)),
+        yvar = "Delay",
+        xvar = seq(1:7),
         nthreads = 2L,
         trim_resamples = FALSE,
         return_best = TRUE,

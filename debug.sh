@@ -13,5 +13,5 @@ apptainer exec \
   --bind $PWD/_targets:/opt/_targets \
   --bind /run/munge:/run/munge \
   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
-  container_models_xgboost.sif \
+  container_models.sif \
   /usr/local/lib/R/bin/R --no-init-file

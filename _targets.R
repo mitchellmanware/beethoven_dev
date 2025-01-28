@@ -11,7 +11,7 @@ default_controller <- crew::crew_controller_local(
 )
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
-scriptlines_container <- "container_models_xgboost.sif"
+scriptlines_container <- "container_models.sif"
 scriptlines_gpu <- glue::glue(
   "#SBATCH --job-name=devgpu \
   #SBATCH --partition=geo \
@@ -42,7 +42,7 @@ targets::tar_option_set(
   packages = c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch", "bonsai", "dials", "xgboost"
+    "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet"
   ),
   repository = "local",
   error = "continue",
@@ -66,9 +66,7 @@ targets::tar_option_set(
 targets::tar_source("inst/targets/targets_critical.R")
 # targets::tar_source("inst/targets/targets_initiate.R")
 # targets::tar_source("inst/targets/targets_covariates.R")
-targets::tar_source("inst/targets/targets_debug.R")
-
-# source("/mnt/function.R")
+targets::tar_source("inst/targets/targets_models.R")
 
 ###########################      SYSTEM SETTINGS      ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
