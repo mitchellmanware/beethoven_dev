@@ -1,8 +1,7 @@
-target_models <-
+################################################################################
+##################             CPU-enabled models             ##################
+target_baselearner_cpu <-
   list(
-    ############################################################################
-    ############################################################################
-    #########################             DEV             ######################
     targets::tar_target(
       dt_feat_calc_xyt_devsubset,
       command = data.table::data.table(
@@ -15,20 +14,6 @@ target_models <-
       df_learner_type_cpu,
       command = beethoven::assign_learner_cv(
         learner = c("elnet"),
-        # learner = c("elnet", "lgb"),
-        cv_mode = c("spatial", "temporal", "spatiotemporal"),
-        cv_rep = 1L,
-        num_device = 1L
-      ) %>%
-        split(seq_len(nrow(.))),
-      iteration = "list"
-    )
-    ,
-    targets::tar_target(
-      df_learner_type_gpu,
-      command = beethoven::assign_learner_cv(
-        learner = c("mlp"),
-        # learner = c("mlp", "xgb"),
         cv_mode = c("spatial", "temporal", "spatiotemporal"),
         cv_rep = 1L,
         num_device = 1L
@@ -86,13 +71,6 @@ target_models <-
           trees = seq(1000, 3000, 1000),
           learn_rate = c(0.1, 0.05, 0.01, 0.005)
         )
-        # xgb = expand.grid(
-        #   mtry = floor(
-        #     c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_feat_calc_xyt_devsubset)
-        #   ),
-        #   trees = seq(1000, 3000, 1000),
-        #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
-        # )
       )
     )
     ,
@@ -111,10 +89,6 @@ target_models <-
           model_type = "lgb",
           device = "gpu"
         )
-        # xgb = beethoven::switch_model(
-        #   model_type = "xgb",
-        #   device = "cuda"
-        # )
       )
     )
     ,
@@ -124,7 +98,7 @@ target_models <-
         r_subsample = 0.3,
         folds = NULL,
         tune_mode = "grid",
-        tune_grid_size = 20L,
+        tune_grid_size = 5L,
         yvar = "Arithmetic.Mean",
         xvar = seq(5, ncol(dt_feat_calc_xyt_devsubset)),
         nthreads = 2L,
@@ -134,7 +108,7 @@ target_models <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_cpu,
+      fit_learner_base_cpu,
       command = beethoven::fit_base_learner(
         learner = df_learner_type_cpu$learner,
         dt_full = dt_feat_calc_xyt_devsubset,
@@ -156,9 +130,27 @@ target_models <-
       pattern = map(df_learner_type_cpu),
       iteration = "list"
     )
+  )
+
+################################################################################
+##################             GPU-enabled models             ##################
+target_baselearner_gpu <-
+  list(
+    targets::tar_target(
+      df_learner_type_gpu,
+      command = beethoven::assign_learner_cv(
+        learner = c("mlp"),
+        cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        cv_rep = 1L,
+        num_device = 4L,
+        balance = TRUE
+      ) %>%
+        split(seq_len(nrow(.))),
+      iteration = "list"
+    )
     ,
     targets::tar_target(
-      workflow_learner_base_gpu,
+      fit_learner_base_gpu,
       command = beethoven::fit_base_learner(
         learner = df_learner_type_gpu$learner,
         dt_full = dt_feat_calc_xyt_devsubset,
@@ -185,9 +177,7 @@ target_models <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_best,
-      command = c(workflow_learner_base_cpu, workflow_learner_base_gpu)
+      fit_learner_base_best,
+      command = c(fit_learner_base_cpu, fit_learner_base_gpu)
     )
-    ############################################################################
-    ############################################################################
   )
