@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #SBATCH --job-name=beethoven
-#SBATCH --mail-user=mitchell.manware@nih.gov
-#SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1

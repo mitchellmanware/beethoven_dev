@@ -17,7 +17,9 @@ scriptlines_gpu <- glue::glue(
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
   #SBATCH --error=slurm/targets_gpu_%j.out \
-  {scriptlines_apptainer} exec --nv --bind {scriptlines_basedir}:/mnt ",
+  {scriptlines_apptainer} exec --nv --env ",
+  "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
+  "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_basedir}/input:/input ",
   "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
