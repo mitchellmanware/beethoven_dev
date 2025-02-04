@@ -7,7 +7,6 @@
 default_controller <- crew::crew_controller_local(
   name = "default_controller",
   workers = 100
-  # seconds_idle = 30
 )
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
@@ -28,7 +27,6 @@ scriptlines_gpu <- glue::glue(
 controller_gpu <- crew.cluster::crew_controller_slurm(
   name = "controller_gpu",
   workers = 4,
-  # seconds_idle = 30,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_gpu
