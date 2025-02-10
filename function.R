@@ -51,9 +51,11 @@ generate_cv_index_spt_dev <- function(
 
   # merge spatial cross validation index with full data
   data_trim$cv <- spatial_cv
-  data_sp <- merge(
-    data, data_trim, by = c(id, coords)
-  )
+  data_sp <- data %>%
+    dplyr::left_join(
+      dplyr::select(data_trim, id, coords[1], coords[2], cv),
+      by = c(id, coords[1], coords[2])
+    )
 
   # check spatial cross validation index is in the data
   stopifnot("cv" %in% names(data_sp))
@@ -63,14 +65,14 @@ generate_cv_index_spt_dev <- function(
   stopifnot(ncol(data_sp) == ncol(data) + 1)
 
   #########################       TEMPORAL FOLDS       #########################
-  # identify unqiue spatial cv indecies
-  sp_indices <- sort(unique(data_sp$cv))
-
-  # all time points
-  tcol <- as.Date(data_sp[[time]])
+  # coerce class of time and cv index
+  data_sp[[time]] <- as.Date(data_sp[[time]])
+  data_sp$cv <- as.integer(data_sp$cv)
 
   # unique time points
-  time_vec <- sort(unique(tcol))
+  time_vec <- sort(unique(data_sp[[time]]))
+  # unique spatial indices
+  sp_indices <- sort(unique(data_sp$cv))
 
   # split time range into `t_fold` folds
   if (year) {
@@ -87,34 +89,20 @@ generate_cv_index_spt_dev <- function(
   }
 
   stopifnot(length(time_vec_split) == t_fold + 1)
-  stopifnot(class(time_vec_split) == class(tcol))
+  stopifnot(class(time_vec_split) == class(data_sp$time))
 
   # list to store temporal cv index
   spt_index_list <- list()
 
-  # test data are within spatial fold `i` and time fold `j`
-  out_id <- which(
-    tcol < time_vec_split[2]
-  )
-  return(list(time_vec_split, out_id))
-  # training data are all other data
-  in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-  spt_index_list <- c(
-    spt_index_list,
-    list(list(analysis = in_id, assessment = out_id))
-  )
-
-  return(spt_index_list)
-
-  for (i in sp_indices) {
+  for (i in seq_along(sp_indices)) {
     for (j in seq(t_fold)) {
       # test data are within spatial fold `i` and time fold `j`
       out_id <- which(
-        tcol > time_vec_split[j] &
-          tcol <= time_vec_split[j + 1] &
-          cvcol == sp_indices[i]
+        data_sp$time >= time_vec_split[j] &
+          data_sp$time < time_vec_split[j + 1] &
+          data_sp$cv == sp_indices[i]
       )
-      # trianing data are all other data
+      # training data are all other data
       in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
       spt_index_list <- c(
         spt_index_list,
@@ -124,4 +112,5 @@ generate_cv_index_spt_dev <- function(
   }
 
   return(spt_index_list)
+
 }
