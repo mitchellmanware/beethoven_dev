@@ -41,7 +41,7 @@ chr_iter_narr <- c(
 )
 
 ################################################################################
-mirai::daemons(45)
+mirai::daemons(50)
 list_dl_narr <- download_narr_map(
   variables = chr_iter_narr,
   directory_to_save = file.path(chr_config_dir, "narr"),

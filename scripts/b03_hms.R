@@ -13,7 +13,7 @@ chr_config_dir <- snakemake@params[["chr_config_dir"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 
 ################################################################################
-mirai::daemons(45)
+mirai::daemons(100)
 list_dl_hms <- download_hms_map(
   directory_to_save = file.path(chr_config_dir, "hms"),
   date = fl_dates(chr_init_dates),

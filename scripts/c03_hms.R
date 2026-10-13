@@ -14,7 +14,7 @@ chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
 
 ################################################################################
-mirai::daemons(45)
+mirai::daemons(100)
 dt_feat_hms_sptmpl <- calculate_hms_map(
   from = amadeus::process_hms(
     date = fl_dates(chr_init_dates),
