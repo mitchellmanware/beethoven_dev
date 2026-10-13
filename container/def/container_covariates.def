@@ -15,7 +15,7 @@ From: rocker/geospatial:latest
     echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale
 
     Rscript -e "install.packages(c('pak', 'qs2', 'mirai', 'mori'))"
-    Rscript -e "pak::pak('NIEHS/amadeus@mm-async-1007')"
+    Rscript -e "pak::pak('NIEHS/amadeus')"
 
 %environment
     export LANG=en_US.UTF-8

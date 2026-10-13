@@ -19,7 +19,7 @@ list_feat_merge_sptmpl <- lapply(
     dt_feat_narr_sptmpl,
     dt_feat_hms_sptmpl
   ),
-  \(x) x[, time := as.POSIXct(time)]
+  \(x) x[, time := as.character(time)]
 )
 
 ################################################################################
