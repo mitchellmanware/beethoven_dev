@@ -1,9 +1,9 @@
 ################################################################################
 # Derive all time-related objects from initial date range definition.
-# --1 chr_dates
-# --2 chr_years
-# --3 list_dates
-# --4 list_dates_julian
+# --1 chr_init_dates
+# --2 int_init_years
+# --3 list_init_dates
+# --4 list_init_datesj
 
 ################################################################################
 # Load libraries and source local functions.
