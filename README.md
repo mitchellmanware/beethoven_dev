@@ -57,22 +57,22 @@ Use lowercase, underscore-separated object names in the order `objecttype_stage_
 
 Configuration names follow `objecttype_config_description` and are defined in `config/config.yaml`. Initialization outputs follow `objecttype_init_description` and are derived by `initiate`. For example, `chr_config_daterange` supplies the start and end dates used to generate `chr_init_dates`; the configuration value is not itself a `.qs` output.
 
-Examples from the current pipeline:
+Examples from the current pipeline, ordered from configuration and initialization through feature calculation and merging:
 
 | Object | Interpretation |
 | --- | --- |
+| `chr_config_daterange` | Configuration mapping with character `start` and `end` dates. |
+| `int_config_radii` | Configured buffer radii in meters, reserved for buffered calculations; current NARR/HMS scripts use `radius = 0`. |
+| `chr_config_dir` | Configured download directory, resolved by the rules and passed to the R scripts under the same parameter name. |
+| `chr_init_dates` | Character vector of all calendar dates in the configured period. |
+| `int_init_years` | Years covered by the configured period, used by the AQS and NARR download rules. |
+| `list_init_dates` | List of chunks of up to 100 calendar dates, with each chunk contained within one year. |
+| `list_init_datesj` | The same date chunks in Julian format (`YYYYJJJ`); the `j` suffix identifies this representation. |
 | `sf_feat_aqs_sp` | An `sf` object containing unique AQS feature locations for the configured period: site identifiers and spatial coordinates, without monitored PM2.5 values. |
 | `dt_feat_aqs_sptmpl` | A `data.table` containing AQS feature locations and times with available PM2.5 observations. The script requests `Arithmetic.Mean` and `Event.Type` from the daily `88101` CSV files. |
 | `dt_feat_narr_sptmpl` | A `data.table` of NARR covariates at AQS locations and times, combining the variables listed in `chr_iter_narr`. |
 | `dt_feat_hms_sptmpl` | A `data.table` of HMS smoke-presence indicators at AQS locations and times: `light_00000`, `medium_00000`, and `heavy_00000` with the current zero-radius setting. |
 | `dt_feat_merge_sptmpl` | The final `data.table`, merging AQS observations and NARR/HMS covariates by `site_id` and character-valued `time`. |
-| `chr_config_daterange` | Configuration mapping with character `start` and `end` dates. |
-| `chr_config_dir` | Configured download directory, resolved by the rules and passed to the R scripts under the same parameter name. |
-| `int_config_radii` | Configured buffer radii in meters, reserved for buffered calculations; current NARR/HMS scripts use `radius = 0`. |
-| `chr_init_dates` | Character vector of all calendar dates in the configured period. |
-| `int_init_years` | Years covered by the configured period, used by the AQS and NARR download rules. |
-| `list_init_dates` | List of chunks of up to 100 calendar dates, with each chunk contained within one year. |
-| `list_init_datesj` | The same date chunks in Julian format (`YYYYJJJ`); the `j` suffix identifies this representation. |
 
 The current download lists use `objecttype_stage_source`: `list_dl_aqs`, `list_dl_narr`, and `list_dl_hms`. The NARR variable selection uses the same three-part form, `chr_iter_narr`. `list_dl_collect` combines the three download results locally in `scripts/c01_aqs.R`. The calculation scripts also use temporary lists, `list_feat_narr_sptmpl` for per-variable NARR results and `list_feat_merge_sptmpl` for the three tables prepared for merging. These lists are not saved as pipeline outputs. The spatial and spatiotemporal feature outputs demonstrate the complete four-part convention.
 
@@ -120,17 +120,17 @@ The DAG shows declared file dependencies between rules and annotates the four ru
 
 | Tier | Rule | R script | Behavior and outputs |
 | --- | --- | --- | --- |
-| initiate | `initiate` | `scripts/a01_initiate.R` | Uses `chr_config_daterange` to generate `chr_init_dates.qs` for the configured date sequence and `int_init_years.qs` for the included years. Also writes `list_init_dates.qs` for chunks of up to 100 dates within each year, and `list_init_datesj.qs` for the same chunks in `YYYYJJJ` format. |
-| download | `download_aqs` | `scripts/b01_aqs.R` | Downloads AQS CSV data for the included years into the `aqs/` download subdirectory and saves the returned list as `list_dl_aqs.qs`. Retains downloaded ZIP files. |
-| download | `download_narr` | `scripts/b02_narr.R` | Calls local `download_narr_map()` with 10 mirai daemons to download NARR NetCDF files for the included years and variables `air.sfc` and `weasd` into `narr/`. Saves the variable names as `chr_iter_narr.qs` and the download summary as `list_dl_narr.qs`. |
-| download | `download_hms` | `scripts/b03_hms.R` | Uses `fl_dates()` to pass the configured date endpoints to local `download_hms_map()` with 45 mirai daemons. Downloads and unzips shapefiles under `hms/`, retains the ZIP files, and saves the download summary as `list_dl_hms.qs`. |
-| calculate | `calculate_aqs` | `scripts/c01_aqs.R` | Reads `chr_init_dates.qs` and all three download lists. Uses `amadeus::process_aqs()` in `location` mode to save spatial locations as `sf_feat_aqs_sp.qs`, and in `available-data` mode to save PM2.5 observations by location and time as `dt_feat_aqs_sptmpl.qs`. |
-| calculate | `calculate_narr` | `scripts/c02_narr.R` | Reads `chr_init_dates.qs`, `chr_iter_narr.qs`, and `sf_feat_aqs_sp.qs`. Processes variables in sequence and calls local `calculate_narr_mirai()` to distribute each variable's raster layers across 45 daemons. Uses `radius = 0`, `fun = "mean"`, and `geom = FALSE`, then merges the variable results into `dt_feat_narr_sptmpl.qs`. |
-| calculate | `calculate_hms` | `scripts/c03_hms.R` | Reads `chr_init_dates.qs` and `sf_feat_aqs_sp.qs`. Processes HMS files and calls local `calculate_hms_map()` to distribute date-specific smoke polygons across 45 daemons. Uses `radius = 0`, default `frac = FALSE`, and `geom = FALSE` to produce smoke-presence indicators in `dt_feat_hms_sptmpl.qs`. |
-| calculate | `calculate_merge` | `scripts/c99_merge.R` | Reads the AQS, NARR, and HMS spatiotemporal feature tables, converts their `time` columns to character strings, and joins them on `site_id` and `time` with `reduce_merge()`. Saves `dt_feat_merge_sptmpl.qs`. |
+| initiate (`a`) | `initiate` | `scripts/a01_initiate.R` | Uses `chr_config_daterange` to generate `chr_init_dates.qs` for the configured date sequence and `int_init_years.qs` for the included years. Also writes `list_init_dates.qs` for chunks of up to 100 dates within each year, and `list_init_datesj.qs` for the same chunks in `YYYYJJJ` format. |
+| download (`b`) | `download_aqs` | `scripts/b01_aqs.R` | Downloads AQS CSV data for the included years into the `aqs/` download subdirectory and saves the returned list as `list_dl_aqs.qs`. Retains downloaded ZIP files. |
+| download (`b`) | `download_narr` | `scripts/b02_narr.R` | Calls local `download_narr_map()` with 10 mirai daemons to download NARR NetCDF files for the included years and variables `air.sfc` and `weasd` into `narr/`. Saves the variable names as `chr_iter_narr.qs` and the download summary as `list_dl_narr.qs`. |
+| download (`b`) | `download_hms` | `scripts/b03_hms.R` | Uses `fl_dates()` to pass the configured date endpoints to local `download_hms_map()` with 45 mirai daemons. Downloads and unzips shapefiles under `hms/`, retains the ZIP files, and saves the download summary as `list_dl_hms.qs`. |
+| calculate (`c`) | `calculate_aqs` | `scripts/c01_aqs.R` | Reads `chr_init_dates.qs` and all three download lists. Uses `amadeus::process_aqs()` in `location` mode to save spatial locations as `sf_feat_aqs_sp.qs`, and in `available-data` mode to save PM2.5 observations by location and time as `dt_feat_aqs_sptmpl.qs`. |
+| calculate (`c`) | `calculate_narr` | `scripts/c02_narr.R` | Reads `chr_init_dates.qs`, `chr_iter_narr.qs`, and `sf_feat_aqs_sp.qs`. Processes variables in sequence and calls local `calculate_narr_mirai()` to distribute each variable's raster layers across 45 daemons. Uses `radius = 0`, `fun = "mean"`, and `geom = FALSE`, then merges the variable results into `dt_feat_narr_sptmpl.qs`. |
+| calculate (`c`) | `calculate_hms` | `scripts/c03_hms.R` | Reads `chr_init_dates.qs` and `sf_feat_aqs_sp.qs`. Processes HMS files and calls local `calculate_hms_map()` to distribute date-specific smoke polygons across 45 daemons. Uses `radius = 0`, default `frac = FALSE`, and `geom = FALSE` to produce smoke-presence indicators in `dt_feat_hms_sptmpl.qs`. |
+| calculate (`c`) | `calculate_merge` | `scripts/c99_merge.R` | Reads the AQS, NARR, and HMS spatiotemporal feature tables, converts their `time` columns to character strings, and joins them on `site_id` and `time` with `reduce_merge()`. Saves `dt_feat_merge_sptmpl.qs`. |
 | — | `all` | None | Requests `output/dt_feat_merge_sptmpl.qs` as the default target. |
 
-The tier identifies the rule's processing stage. `all` selects the workflow endpoints and has no processing tier. No `model` or `predict` rules are defined yet.
+The tier identifies the rule's processing stage and the letter prefix used in rule and script filenames: `a` = initiate, `b` = download, and `c` = calculate. The subsequent tiers are `d` = model and `e` = predict; neither has rules defined yet. `all` selects the workflow endpoints and has no processing tier or letter code.
 
 The three download rules can run independently after `initiate`, subject to Snakemake's scheduling limit. Each dataset is handled by one rule invocation for the whole configured period; there are no per-date, per-year, or per-variable wildcard jobs. Within NARR/HMS rules, mirai distributes downloads or extraction tasks as described below. `list_init_dates.qs` and `list_init_datesj.qs` have no downstream consumers yet; `chr_iter_narr.qs` is consumed by `calculate_narr`.
 
@@ -146,10 +146,10 @@ The NARR/HMS scripts source `R/amadeus.R`, start their local worker pools with `
 
 | Rule | Local entry point | Unit dispatched to mirai | Daemons |
 | --- | --- | --- | --- |
-| `download_narr` | `download_narr_map()` | One URL/destination pair for a required NetCDF file. | 10 |
-| `download_hms` | `download_hms_map()` | One URL/destination pair for a required daily smoke file. | 45 |
-| `calculate_narr` | `calculate_narr_mirai()` | One raster layer within the current NARR variable. | 45 |
-| `calculate_hms` | `calculate_hms_map()` | One date's smoke polygons, evaluated at all supplied locations. | 45 |
+| `download_narr` | `download_narr_map()` | One URL/destination pair for a required NetCDF file. | 50 |
+| `download_hms` | `download_hms_map()` | One URL/destination pair for a required daily smoke file. | 100 |
+| `calculate_narr` | `calculate_narr_mirai()` | One raster layer within the current NARR variable. | 100 |
+| `calculate_hms` | `calculate_hms_map()` | One date's smoke polygons, evaluated at all supplied locations. | 100 |
 
 The download helpers discover required files, filter existing destinations with `amadeus::check_destfile()`, and dispatch the remaining URL/destination pairs through `download_run_mirai()`. That dispatcher uses `mirai::mirai_map()` to call `amadeus::download_run_method()` and combines success, failure, and skipped counts plus failed URLs/files. The defaults `max_tries = 20` and `rate_limit = 2` are passed to each task; they do not impose a shared limit across all workers. HMS ZIP extraction runs after downloads are collected.
 
@@ -183,7 +183,7 @@ mkdir -p slurm
 sbatch run.sh
 ```
 
-`run.sh` requests the `geo` partition, one task, 50 CPUs, and 10 GB of memory. It writes `slurm/cov_<jobid>.out` and `.err` and includes email notifications for completion or failure. Review the allocation and notification directives for the intended environment. Snakemake and the local mirai pools run within this single allocation; no Snakemake cluster executor or remote mirai deployment is configured.
+`run.sh` requests the `geo` partition, one task, 105 CPUs, and 10 GB of memory. It writes `slurm/cov_<jobid>.out` and `.err` and includes email notifications for completion or failure. Review the allocation and notification directives for the intended environment. Snakemake and the local mirai pools run within this single allocation; no Snakemake cluster executor or remote mirai deployment is configured.
 
 The Snakemake core limit is selected from the first script argument, then `SLURM_CPUS_PER_TASK`, then a fallback of `1`. `run.sh` also exports `CURL_CA_BUNDLE` and `SSL_CERT_FILE` as `/etc/ssl/certs/ca-certificates.crt` for download certificate verification.
 
