@@ -15,7 +15,7 @@ chr_iter_narr <- qs2::qs_read(snakemake@input[["chr_iter_narr"]])
 sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
 
 ################################################################################
-mirai::daemons(length(chr_iter_narr))
+mirai::daemons(45)
 list_feat_narr_sptmpl <- lapply(
   chr_iter_narr,
   function(x) {
