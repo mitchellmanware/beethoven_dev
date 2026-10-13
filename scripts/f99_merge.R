@@ -1,5 +1,5 @@
 ################################################################################
-# Merge all calculated covariates at unique AQS locations, fill time.
+# Merge all calculated covariates at Uber H3 (resolution 8) locations.
 
 ################################################################################
 # Load libraries and source local functions.
