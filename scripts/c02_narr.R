@@ -15,11 +15,11 @@ chr_iter_narr <- qs2::qs_read(snakemake@input[["chr_iter_narr"]])
 sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
 
 ################################################################################
-mirai::daemons(45)
+mirai::daemons(length(chr_iter_narr))
 list_feat_narr_sptmpl <- lapply(
   chr_iter_narr,
   function(x) {
-    suppressMessages(
+    dt_feat_x_sptmpl <- suppressMessages(
       calculate_narr_mirai(
         from = amadeus::process_narr(
           path = file.path(chr_config_dir, "narr", x),
@@ -33,6 +33,13 @@ list_feat_narr_sptmpl <- lapply(
         geom = FALSE
       )
     )
+    if ("level" %in% names(dt_feat_x_sptmpl)) {
+      dt_feat_x_sptmpl |>
+        dplyr::filter(level == 1000) |>
+        dplyr::select(-level)
+    } else {
+      dt_feat_x_sptmpl
+    }
   }
 )
 mirai::daemons(0)
