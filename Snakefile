@@ -13,10 +13,11 @@ print(
 # Define pipeline endpoint.
 rule all:
     input:
-        "output/dt_pred_merge_sptmpl.qs"
+        "output/list_base_cv_rset.qs"
 
 ###############################      PIPELINE RULES      ###############################
 include: "rules/a01_initiate.smk"
 include: "rules/b01_download.smk"
 include: "rules/c01_calculate.smk"
+include: "rules/d01_model.smk"
 include: "rules/f01_grid.smk"

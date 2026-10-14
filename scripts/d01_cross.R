@@ -9,8 +9,11 @@ library(beethoven)
 
 ################################################################################
 # Import configured variables and inputs.
-# dt_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_merge_sptmpl"]])
-dt_feat_merge_sptmpl <- qs2::qs_read("output/dt_feat_merge_sptmpl.qs")
+dt_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_merge_sptmpl"]])
+
+################################################################################
+# !!! For full dispatch NAs will be imputed, not omitted. !!!
+dt_feat_merge_sptmpl <- na.omit(dt_feat_merge_sptmpl)
 
 ################################################################################
 # Define common parameters across all base learner models.
@@ -26,7 +29,8 @@ list_base_params_static <- list(
   # dev with 3L models
   n_models = 3L,
   metric = "mae",
-  tune = 10L,
+  # dev with small tune grid
+  tune = 3L,
   crs = 5070L,
   cellsize = 250000L,
   cvsize = 5L
@@ -78,7 +82,6 @@ int_duplicates <- vapply(
   },
   logical(1)
 )
-which(int_duplicates)
 stopifnot(!any(int_duplicates))
 
 ################################################################################
@@ -101,10 +104,11 @@ list_base_cv_rset <- mirai::collect_mirai(
 mirai::daemons(0)
 
 ################################################################################
-# qs2::qs_save(
-#   list_base_params_static,
-#   snakemake@output[["list_base_params_static"]]
-# )
-# qs2::qs_save(list_base_cv_rset, snakemake@output[["list_base_cv_rset"]])
-qs2::qs_save(list_base_params_static, "../output/list_base_params_static.qs")
-qs2::qs_save(list_base_cv_rset, "../output/list_base_cv_rset.qs")
+qs2::qs_save(
+  rlang::duplicate(list_base_params_static),
+  snakemake@output[["list_base_params_static"]]
+)
+qs2::qs_save(
+  rlang::duplicate(list_base_cv_rset),
+  snakemake@output[["list_base_cv_rset"]]
+)
