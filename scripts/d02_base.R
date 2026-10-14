@@ -1,5 +1,5 @@
 ################################################################################
-# Run {xgboost} base learner models across all cross validation folds.
+# Run {glmnet} base learner models across all cross validation folds.
 
 ################################################################################
 # Load libraries and source local functions.
@@ -7,10 +7,10 @@ library(beethoven)
 
 ################################################################################
 # Import configured variables and inputs.
-# list_base_params_static <- qs2::qs_read(snakemake@input[["list_base_params_static"]])
-# list_base_cv_index <- qs2::qs_read(snakemake@input[["list_base_cv_index"]])
-list_base_params_static <- qs2::qs_read("../output/list_base_params_static.qs")
-list_base_cv_rset <- qs2::qs_read("../output/list_base_cv_rset.qs")
+list_base_params_static <- qs2::qs_read(snakemake@input[[
+  "list_base_params_static"
+]])
+list_base_cv_rset <- qs2::qs_read(snakemake@input[["list_base_cv_rset"]])
 
 ################################################################################
 # Define {elnet} engine and device.
@@ -18,20 +18,35 @@ spec_elnet <- parsnip::linear_reg(
   mixture = parsnip::tune(),
   penalty = parsnip::tune()
 ) |>
-  parsnip::set_engine("brulee", device = "cpu") |>
+  parsnip::set_engine("glmnet", device = "cpu") |>
   parsnip::set_mode("regression")
 
 ################################################################################
 # Fit {elnet} base learner models.
-m <- beethoven::fit_base_learner(
-  rset = list_base_cv_rset[[1]],
-  model = spec_elnet,
-  tune_grid_size = 2,
-  yvar = list_base_params_static$yvar,
-  xvar = list_base_params_static$xvar,
-  drop_vars = list_base_params_static$dvar,
-  normalize = list_base_params_static$normalize,
-  metric = list_base_params_static$metric,
-  full_data = list_base_params_static$data
+mirai::daemons(length(list_base_cv_rset))
+mirai_base_fit_elnet <- mirai::mirai_map(
+  list_base_cv_rset,
+  function(x) {
+    beethoven::fit_base_learner(
+      rset = x,
+      model = spec_elnet,
+      tune_grid_size = list_base_params_static$tune,
+      yvar = list_base_params_static$yvar,
+      xvar = list_base_params_static$xvar,
+      drop_vars = list_base_params_static$dvar,
+      normalize = list_base_params_static$normalize,
+      metric = list_base_params_static$metric,
+      full_data = list_base_params_static$data
+    )
+  },
+  spec_elnet = spec_elnet,
+  list_base_params_static = list_base_params_static
 )
-m
+list_base_fit_elnet <- mirai::collect_mirai(
+  mirai_base_fit_elnet,
+  options = ".stop"
+)
+mirai::daemons(0)
+
+################################################################################
+qs2::qs_save(list_base_fit_elnet, snakemake@output[["list_base_fit_elnet"]])

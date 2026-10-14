@@ -13,7 +13,7 @@ print(
 # Define pipeline endpoint.
 rule all:
     input:
-        "output/list_base_cv_rset.qs"
+        "output/list_base_fit_elnet.qs"
 
 ###############################      PIPELINE RULES      ###############################
 include: "rules/a01_initiate.smk"
