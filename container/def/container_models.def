@@ -32,8 +32,9 @@ From: rocker/geospatial:latest
     apt-get install -y --no-install-recommends cuda-toolkit-12-8
     rm -rf /var/lib/apt/lists/*
 
-    Rscript -e 'install.packages(c("pak", "qs2", "mirai", "mori", "h3jsr"))'
-    Rscript -e 'pak::pak("NIEHS/beethoven@mm-1013")'
+    Rscript -e 'install.packages(c("pak", "qs2", "mirai", "mori", "h3jsr", "lme4"))'
+    Rscript -e 'pak::pkg_install("NIEHS/beethoven@mm-1013", dependencies = TRUE)'
+    Rscript -e 'pak::pkg_install(c("glmnet", "lme4"))'
     Rscript -e 'install.packages("torch"); torch::install_torch(version = "latest", update = TRUE)'
 
 %environment
