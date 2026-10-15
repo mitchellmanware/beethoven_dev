@@ -15,8 +15,6 @@ dt_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_merge_sptmpl"]])
 # !!! For full dispatch NAs will be imputed, not omitted. !!!
 dt_feat_merge_sptmpl <- na.omit(dt_feat_merge_sptmpl)
 dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |> dplyr::select(-Event.Type)
-dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |>
-  dplyr::mutate(.row = dplyr::row_number())
 
 ################################################################################
 # Define common parameters across all base learner models.
@@ -27,7 +25,7 @@ list_base_params_static <- list(
     names(dt_feat_merge_sptmpl),
     c("site_id", "time", "Event.Type", "Arithmetic.Mean", ".row")
   ),
-  dvar = c("site_id", "time", ".row"),
+  dvar = c("site_id", "time"),
   normalize = TRUE,
   n_models = 20L,
   metric = "mae",
@@ -104,6 +102,11 @@ list_base_cv_rset <- mirai::collect_mirai(
   options = ".stop"
 )
 mirai::daemons(0)
+
+################################################################################
+# Store row identifiers used for full training data.
+list_base_params_static$data <- list_base_params_static$data |>
+  dplyr::mutate(.row = dplyr::row_number())
 
 ################################################################################
 qs2::qs_save(
