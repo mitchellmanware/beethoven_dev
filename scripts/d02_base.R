@@ -49,4 +49,38 @@ list_base_fit_elnet <- mirai::collect_mirai(
 mirai::daemons(0)
 
 ################################################################################
+# Collect withheld (out of sample) predictions from all base learner models.
+chr_prednames <- sprintf(
+  "pred_%03d",
+  seq_along(list_base_fit_elnet)
+)
+dt_base_fit_oos <- dplyr::bind_rows(
+  lapply(
+    seq_along(list_base_fit_elnet),
+    function(i) {
+      list_base_fit_elnet[[i]]$predictions |>
+        dplyr::transmute(
+          .row,
+          model = chr_prednames[[i]],
+          .pred
+        )
+    }
+  )
+) |>
+  dplyr::group_by(.row, model) |>
+  tidyr::pivot_wider(
+    names_from = model,
+    values_from = .pred
+  )
+
+################################################################################
+# Merge out of sample predictions with AQS site/time data.
+dt_base_aqs_sptmpl <- merge(
+  list_base_params_static$data,
+  dt_base_fit_oos,
+  by = ".row"
+)
+
+################################################################################
 qs2::qs_save(list_base_fit_elnet, snakemake@output[["list_base_fit_elnet"]])
+qs2::qs_save(dt_base_aqs_sptmpl, snakemake@output[["dt_base_aqs_sptmpl"]])

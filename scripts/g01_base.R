@@ -25,8 +25,8 @@ names(dt_pred_merge_sptmpl) <- gsub(
 
 ################################################################################
 # Predict at H3 sites, collect predictions, and set unique name.
-dt_base_pred_sptmpl <- do.call(
-  cbind,
+dt_pred_base_sptmpl <- do.call(
+  dplyr::bind_cols,
   lapply(
     list_base_fit_elnet,
     function(x) {
@@ -34,17 +34,17 @@ dt_base_pred_sptmpl <- do.call(
     }
   )
 )
-names(dt_base_pred_sptmpl) <- sprintf(
+names(dt_pred_base_sptmpl) <- sprintf(
   "pred_%03d",
-  seq_along(names(dt_base_pred_sptmpl))
+  seq_along(names(dt_pred_base_sptmpl))
 )
 
 ################################################################################
 # Append to spatiotemporal identifiers (site_id, lon, lat, time).
-dt_base_pred_sptmpl <- dplyr::bind_cols(
+dt_pred_base_sptmpl <- dplyr::bind_cols(
   dt_pred_merge_sptmpl[, c("site_id", "time", "lon", "lat")],
-  dt_base_pred_sptmpl
+  dt_pred_base_sptmpl
 )
 
 ################################################################################
-qs2::qs_save(dt_base_pred_sptmpl, snakemake@output[["dt_base_pred_sptmpl"]])
+qs2::qs_save(dt_pred_base_sptmpl, snakemake@output[["dt_pred_base_sptmpl"]])

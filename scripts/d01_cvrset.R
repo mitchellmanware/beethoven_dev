@@ -15,6 +15,8 @@ dt_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_merge_sptmpl"]])
 # !!! For full dispatch NAs will be imputed, not omitted. !!!
 dt_feat_merge_sptmpl <- na.omit(dt_feat_merge_sptmpl)
 dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |> dplyr::select(-Event.Type)
+dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |>
+  dplyr::mutate(.row = dplyr::row_number())
 
 ################################################################################
 # Define common parameters across all base learner models.
@@ -23,9 +25,9 @@ list_base_params_static <- list(
   yvar = "Arithmetic.Mean",
   xvar = setdiff(
     names(dt_feat_merge_sptmpl),
-    c("site_id", "time", "Event.Type", "Arithmetic.Mean")
+    c("site_id", "time", "Event.Type", "Arithmetic.Mean", ".row")
   ),
-  dvar = c("site_id", "time"),
+  dvar = c("site_id", "time", ".row"),
   normalize = TRUE,
   n_models = 20L,
   metric = "mae",
