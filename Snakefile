@@ -13,7 +13,7 @@ print(
 # Define pipeline endpoint.
 rule all:
     input:
-        "output/list_base_fit_elnet.qs"
+        "output/dt_base_pred_sptmpl.qs"
 
 ###############################      PIPELINE RULES      ###############################
 include: "rules/a01_initiate.smk"
